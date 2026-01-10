@@ -72,7 +72,7 @@ play with - 玩 ……； 和 ……一起玩
 good - 好的；亲密的
 friend  - 朋友
 she - 她
-has - 有 （用于第三人称单数代词、不可数名词或单数可数名词后）
+has - 有  | （用于第三人称单数代词、不可数名词或单数可数名词后）
 often -  经常
 share  - 分享
 Happy birthday! - 生日快乐！
@@ -89,13 +89,13 @@ short  - 短的；矮的
 big  - 大的
 small  - 小的
 tall  - 高的
-let's - 我们 …… 吧！（= let us）（提出建议时说）
+let's - 我们 …… 吧！ | （= let us）（提出建议时说）
 OK  - 对；好；行
 his  - 他的
 he - 他
-or - 或者，还是（用以引出另一种可能性）
+or - 或者，还是 | （用以引出另一种可能性）
 her -  她的
-are - 是 （用于 we、you、they 或复数名词等后边）
+are - 是  | （用于 we、you、they 或复数名词等后边）
 
 ---Unit 5---
 milk -  奶
@@ -112,7 +112,7 @@ drink -  饮料
 fruit  - 水果
 buy  - 买
 some - 一些
-too - 也；还（通常置于句末）
+too - 也；还 | （通常置于句末）
 tomorrow  - 明天
 like  - 喜欢
 yes - 是；对；好的
@@ -129,7 +129,7 @@ bad  - 不好的；有害的
 cake  - 蛋糕
 bread  - 面包
 rice - 大米；米饭
-noodle - 面条（常用复数形式noodles）
+noodle - 面条 | （常用复数形式noodles）
 soup - 汤；羹
 egg - 蛋；鸡蛋
 chicken  - 鸡肉
@@ -144,4 +144,4 @@ dinner  - 主餐,正餐
 need  - 需要
 vegetable  - 蔬菜
 tomatoes with eggs - 西红柿炒鸡蛋
-What about ...?  - …… 怎么样？（用于提出建议） 
+What about ...?  - …… 怎么样？ | （用于提出建议） 
