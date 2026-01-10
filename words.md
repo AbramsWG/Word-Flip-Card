@@ -140,7 +140,7 @@ food  - 食物
 have - 吃；喝
 but - 然而；但是
 hungry  - 饥饿的
-dinner  - 主餐,正餐
+dinner  - 主餐，正餐
 need  - 需要
 vegetable  - 蔬菜
 tomatoes with eggs - 西红柿炒鸡蛋
