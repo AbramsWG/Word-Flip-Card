@@ -1,0 +1,5 @@
+{
+  "name": "Smart Vocab Flip",
+  "description": "A high-performance English word memorization tool using a 3D flip card interface, local storage persistence, and native text-to-speech integration for a premium learning experience.",
+  "requestFramePermissions": []
+}
