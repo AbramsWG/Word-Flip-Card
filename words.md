@@ -72,7 +72,7 @@ play with - 玩 ……； 和 ……一起玩
 good - 好的；亲密的
 friend  - 朋友
 she - 她
-has - 有  | （用于第三人称单数代词、不可数名词或单数可数名词后）
+has - 有 | （用于第三人称单数代词、不可数名词或单数可数名词后）
 often -  经常
 share  - 分享
 Happy birthday! - 生日快乐！
