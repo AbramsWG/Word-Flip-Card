@@ -16,7 +16,6 @@ const App = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const voicesInitialized = useRef(false);
 
-  // 1. 优先加载持久化数据
   useEffect(() => {
     const savedWords = localStorage.getItem('smart_vocab_words_v3');
     const savedSettings = localStorage.getItem('smart_vocab_settings_v3');
@@ -25,7 +24,6 @@ const App = () => {
     setIsLoaded(true);
   }, []);
 
-  // 2. 语音初始化逻辑
   useEffect(() => {
     const initializeVoice = () => {
       const voices = getAvailableVoices();
@@ -37,14 +35,10 @@ const App = () => {
         }
       }
     };
-
     initializeVoice();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = initializeVoice;
-    }
+    if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = initializeVoice;
   }, [settings.voiceURI]);
 
-  // 3. 只有加载完成后才允许保存，防止空状态覆盖
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('smart_vocab_words_v3', JSON.stringify(words));
@@ -60,14 +54,33 @@ const App = () => {
     try {
       const res = await fetch('./words.md');
       const text = await res.text();
-      const defaultWords = text.split('\n')
-        .filter(l => l.trim() && l.includes('-'))
-        .map((line, i) => {
-          const parts = line.split('-').map(s => s.trim());
+      let currentUnit = "General";
+      const defaultWords = [];
+      
+      text.split('\n').forEach((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        
+        // 识别 Unit 标记
+        const unitMatch = trimmed.match(/---Unit\s*(\d+)---/i);
+        if (unitMatch) {
+          currentUnit = `Unit ${unitMatch[1]}`;
+          return;
+        }
+
+        if (trimmed.includes('-')) {
+          const parts = trimmed.split('-').map(s => s.trim());
           const eng = parts[0];
           const chi = parts.slice(1).join('-').replace(/\s*\|\s*/g, '\n');
-          return { id: `def-${i}-${Date.now()}`, english: eng, chinese: chi, mastered: false };
-        });
+          defaultWords.push({ 
+            id: `def-${i}-${Date.now()}`, 
+            english: eng, 
+            chinese: chi, 
+            mastered: false,
+            unit: currentUnit 
+          });
+        }
+      });
       setWords(defaultWords);
     } catch (e) { alert('加载失败'); }
   };
