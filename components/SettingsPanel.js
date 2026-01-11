@@ -24,6 +24,13 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
     };
   }, []);
 
+  // 识别高品质音色（检测系统元数据）
+  const isHighQuality = (voice) => {
+    const uri = voice.voiceURI.toLowerCase();
+    const name = voice.name.toLowerCase();
+    return uri.includes('enhanced') || uri.includes('premium');
+  };
+
   return html`
     <div className="w-full max-w-2xl p-4">
       <div className="bg-white p-10 rounded-[3rem] shadow-xl border">
@@ -36,7 +43,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
           <!-- 语音选择 -->
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <${Lucide.Globe} size=${16} /> 推荐音色 (英文)
+              <${Lucide.Globe} size=${16} /> 推荐音色 (精选英文)
             </label>
             <div className="relative">
               <select 
@@ -46,7 +53,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
               >
                 ${voices.map(v => html`
                   <option key=${v.voiceURI} value=${v.voiceURI}>
-                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} (${v.lang})
+                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} ${isHighQuality(v) ? ' ✨ 高级感' : ''} (${v.lang})
                   </option>
                 `)}
               </select>

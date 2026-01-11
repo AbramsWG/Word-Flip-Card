@@ -2,19 +2,22 @@
 export const getAvailableVoices = () => {
   if (typeof window === 'undefined' || !window.speechSynthesis) return [];
   
-  // 获取所有音色，过滤掉包含 "Default" 字样的系统占位符（如果存在）
-  const allVoices = window.speechSynthesis.getVoices().filter(v => !v.name.toLowerCase().includes('default'));
+  const allVoices = window.speechSynthesis.getVoices();
   
-  // 仅保留英文音色
-  const enVoices = allVoices.filter(v => v.lang.startsWith('en'));
-  
-  // 优质音色关键词匹配
-  const premiumKeywords = ['jenny', 'microsoft ana', 'sonia', 'samantha', 'ava'];
-  // const premiumKeywords = [];
-  const premium = enVoices.filter(v => premiumKeywords.some(k => v.name.toLowerCase().includes(k)));
-  
-  // 优先返回优质音色，否则返回所有英文音色
-  return premium.length > 0 ? premium : enVoices;
+  // 恢复您最初要求的优质音色白名单
+  const recommendedNames = [
+    'jenny', 'microsoft ana', 'sonia', 'samantha'
+  ];
+
+  return allVoices.filter(v => {
+    const name = v.name.toLowerCase();
+    const isEnglish = v.lang.startsWith('en');
+    // 逻辑：必须在白名单内，且过滤掉手机自带的低质量 'compact' 版本
+    const isRecommended = recommendedNames.some(rec => name.includes(rec));
+    const isNotCompact = !name.includes('compact');
+    
+    return isEnglish && isRecommended && isNotCompact;
+  }).sort((a, b) => a.name.localeCompare(b.name));
 };
 
 export const speak = (text, voiceURI, rate) => {
