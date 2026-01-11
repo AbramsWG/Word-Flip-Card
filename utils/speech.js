@@ -3,13 +3,15 @@ export const getAvailableVoices = () => {
   if (typeof window === 'undefined' || !window.speechSynthesis) return [];
   
   // 获取所有音色，过滤掉包含 "Default" 字样的系统占位符（如果存在）
-  const allVoices = window.speechSynthesis.getVoices().filter(v => !v.name.toLowerCase().includes('default'));
+  // const allVoices = window.speechSynthesis.getVoices().filter(v => !v.name.toLowerCase().includes('default'));
   
   // 仅保留英文音色
-  const enVoices = allVoices.filter(v => v.lang.startsWith('en'));
+  // const enVoices = allVoices.filter(v => v.lang.startsWith('en'));
+
+  const enVoices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
   
   // 优质音色关键词匹配
-  const premiumKeywords = ['jenny', 'microsoft ana', 'sonia', 'samantha'];
+  const premiumKeywords = ['jenny', 'microsoft ana', 'sonia', 'samantha', 'enhanced'];
   //const premiumKeywords = [];
   const premium = enVoices.filter(v => premiumKeywords.some(k => v.name.toLowerCase().includes(k)));
   
@@ -20,7 +22,7 @@ export const getAvailableVoices = () => {
 export const speak = (text, voiceURI, rate) => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(text.toLowerCase());
   const voices = window.speechSynthesis.getVoices();
   const selectedVoice = voices.find(v => v.voiceURI === voiceURI);
   if (selectedVoice) utterance.voice = selectedVoice;
