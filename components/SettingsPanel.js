@@ -46,7 +46,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
               >
                 ${voices.map(v => html`
                   <option key=${v.voiceURI} value=${v.voiceURI}>
-                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} (${v.lang}) *${v.voiceURI}*
+                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} (${v.lang})
                   </option>
                 `)}
               </select>
