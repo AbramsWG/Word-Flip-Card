@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import htm from 'htm';
 import * as Lucide from 'lucide-react';
 import { getAvailableVoices } from '../utils/speech.js';
@@ -8,109 +8,55 @@ const html = htm.bind(React.createElement);
 
 const SettingsPanel = ({ settings, onUpdateSettings }) => {
   const [voices, setVoices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadVoices = useCallback(() => {
-    const availableVoices = getAvailableVoices();
-    if (availableVoices.length > 0) {
-      setVoices(availableVoices);
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    loadVoices();
-    
-    // 某些浏览器需要一点时间加载语音包
-    const timer = setTimeout(loadVoices, 100);
-    const timerLong = setTimeout(loadVoices, 500);
+    const load = () => {
+      const availableVoices = getAvailableVoices();
+      setVoices(availableVoices);
+    };
 
+    load();
     if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
+      window.speechSynthesis.onvoiceschanged = load;
     }
-    
     return () => { 
-      clearTimeout(timer);
-      clearTimeout(timerLong);
       if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null; 
     };
-  }, [loadVoices]);
-
-  const isHighQuality = (voice, allVoices) => {
-    const uri = (voice.voiceURI || '').toLowerCase();
-    const name = (voice.name || '').toLowerCase();
-    
-    const hasQualityKeyword = [
-      'enhanced', 'premium', 'plus', 'hi-fi', 'high', 'natural', 'online'
-    ].some(keyword => uri.includes(keyword) || name.includes(keyword));
-
-    if (hasQualityKeyword) return true;
-
-    const siblings = allVoices.filter(v => v.name === voice.name && v.lang === voice.lang);
-    if (siblings.length > 1) {
-      const longestUri = siblings.reduce((prev, current) => 
-        (prev.voiceURI.length > current.voiceURI.length) ? prev : current
-      );
-      return voice.voiceURI === longestUri.voiceURI;
-    }
-
-    return false;
-  };
+  }, []);
 
   return html`
     <div className="w-full max-w-2xl p-4">
-      <div className="bg-white p-8 sm:p-10 rounded-[3rem] shadow-xl border">
+      <div className="bg-white p-10 rounded-[3rem] shadow-xl border">
         <h2 className="text-3xl font-black mb-10 flex items-center gap-4 text-slate-800">
           <span className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl"><${Lucide.Sliders} /></span>
           偏好设置
         </h2>
         
         <div className="space-y-10">
+          <!-- 语音选择 -->
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <${Lucide.Globe} size=${16} /> 推荐音色 (精选英文)
+              <${Lucide.Globe} size=${16} /> 推荐音色 (英文)
             </label>
-            
-            <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-              ${isLoading && voices.length === 0 ? html`
-                <div className="flex flex-col items-center justify-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                  <div className="animate-spin text-indigo-600 mb-4"><${Lucide.Loader2} size=${32} /></div>
-                  <p className="text-sm text-slate-400">正在检索系统音色...</p>
-                </div>
-              ` : voices.map(v => {
-                const highQuality = isHighQuality(v, voices);
-                const isSelected = settings.voiceURI === v.voiceURI;
-                return html`
-                  <button 
-                    key=${v.voiceURI}
-                    onClick=${() => onUpdateSettings({...settings, voiceURI: v.voiceURI})}
-                    className=${`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
-                      isSelected 
-                        ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-100' 
-                        : 'border-slate-100 bg-slate-50 hover:border-indigo-200'
-                    }`}
-                  >
-                    <div className="flex flex-col pr-4 overflow-hidden">
-                      <span className=${`font-bold truncate ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
-                        ${v.name.replace(/Microsoft |Google |Apple /g, '')}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono truncate">${v.voiceURI.split('.').pop()}</span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      ${highQuality && html`
-                        <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded-full font-black flex items-center gap-1">
-                          ✨ 高级感
-                        </span>
-                      `}
-                      ${isSelected && html`<${Lucide.Check} size=${18} className="text-indigo-600" />`}
-                    </div>
-                  </button>
-                `;
-              })}
+            <div className="relative">
+              <select 
+                value=${settings.voiceURI} 
+                onChange=${e => onUpdateSettings({...settings, voiceURI: e.target.value})} 
+                className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none text-slate-700 font-medium"
+              >
+                ${voices.map(v => html`
+                  <option key=${v.voiceURI} value=${v.voiceURI}>
+                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} (${v.lang})
+                  </option>
+                `)}
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <${Lucide.ChevronDown} size=${20} />
+              </div>
             </div>
-            ${!isLoading && html`<p className="text-[10px] text-slate-400 px-2 italic">提示：若看到多个同名音色，通常标注为“高级感”的音色发音更加自然。</p>`}
           </section>
 
+          <!-- 语速控制 -->
           <section className="space-y-4">
             <div className="flex justify-between items-center">
               <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -126,6 +72,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             />
           </section>
 
+          <!-- 过滤选项 -->
           <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
             <div className="space-y-1">
               <span className="font-bold text-slate-700 flex items-center gap-2">
