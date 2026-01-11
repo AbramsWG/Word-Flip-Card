@@ -9,8 +9,8 @@ export const getAvailableVoices = () => {
   const enVoices = allVoices.filter(v => v.lang.startsWith('en'));
   
   // 优质音色关键词匹配
-  // const premiumKeywords = ['jenny', 'microsoft ana', 'sonia', 'samantha', 'ava'];
-  const premiumKeywords = [];
+  const premiumKeywords = ['jenny', 'microsoft ana', 'sonia', 'samantha', 'ava'];
+  // const premiumKeywords = [];
   const premium = enVoices.filter(v => premiumKeywords.some(k => v.name.toLowerCase().includes(k)));
   
   // 优先返回优质音色，否则返回所有英文音色
