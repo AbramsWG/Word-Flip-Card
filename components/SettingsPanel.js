@@ -24,42 +24,56 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
     };
   }, []);
 
-  // 识别高品质音色（检测系统元数据）
+  // 识别高品质音色：同时检测 URI 和名称，确保 iOS 系统音色能被识别
   const isHighQuality = (voice) => {
-    const uri = voice.voiceURI.toLowerCase();
-    const name = voice.name.toLowerCase();
-    return uri.includes('enhanced') || uri.includes('premium');
+    const uri = (voice.voiceURI || '').toLowerCase();
+    const name = (voice.name || '').toLowerCase();
+    return uri.includes('enhanced') || uri.includes('premium') || name.includes('enhanced') || name.includes('premium');
   };
 
   return html`
     <div className="w-full max-w-2xl p-4">
-      <div className="bg-white p-10 rounded-[3rem] shadow-xl border">
+      <div className="bg-white p-8 sm:p-10 rounded-[3rem] shadow-xl border">
         <h2 className="text-3xl font-black mb-10 flex items-center gap-4 text-slate-800">
           <span className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl"><${Lucide.Sliders} /></span>
           偏好设置
         </h2>
         
         <div className="space-y-10">
-          <!-- 语音选择 -->
+          <!-- 语音选择：改为卡片列表以适配 iOS -->
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <${Lucide.Globe} size=${16} /> 推荐音色 (精选英文)
             </label>
-            <div className="relative">
-              <select 
-                value=${settings.voiceURI} 
-                onChange=${e => onUpdateSettings({...settings, voiceURI: e.target.value})} 
-                className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none text-slate-700 font-medium"
-              >
-                ${voices.map(v => html`
-                  <option key=${v.voiceURI} value=${v.voiceURI}>
-                    ${v.name.replace(/Microsoft |Google |Apple /g, '')} ${isHighQuality(v) ? ' ✨ 高级感' : ''} (${v.lang})
-                  </option>
-                `)}
-              </select>
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <${Lucide.ChevronDown} size=${20} />
-              </div>
+            <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              ${voices.map(v => {
+                const highQuality = isHighQuality(v);
+                const isSelected = settings.voiceURI === v.voiceURI;
+                return html`
+                  <button 
+                    key=${v.voiceURI}
+                    onClick=${() => onUpdateSettings({...settings, voiceURI: v.voiceURI})}
+                    className=${`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${
+                      isSelected 
+                        ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-100' 
+                        : 'border-slate-100 bg-slate-50 hover:border-indigo-200'
+                    }`}
+                  >
+                    <div className="flex flex-col">
+                      <span className=${`font-bold ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
+                        ${v.name.replace(/Microsoft |Google |Apple /g, '')}
+                      </span>
+                      <span className="text-xs text-slate-400">${v.lang}</span>
+                    </div>
+                    ${highQuality && html`
+                      <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded-full font-black flex items-center gap-1 shrink-0">
+                        ✨ 高级感
+                      </span>
+                    `}
+                    ${isSelected && html`<${Lucide.Check} size=${18} className="text-indigo-600 ml-2" />`}
+                  </button>
+                `;
+              })}
             </div>
           </section>
 
