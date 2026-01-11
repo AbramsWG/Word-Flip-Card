@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import htm from 'htm';
 import * as Lucide from 'lucide-react';
 import { getAvailableVoices } from '../utils/speech.js';
@@ -8,36 +8,44 @@ const html = htm.bind(React.createElement);
 
 const SettingsPanel = ({ settings, onUpdateSettings }) => {
   const [voices, setVoices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const load = () => {
-      const availableVoices = getAvailableVoices();
+  const loadVoices = useCallback(() => {
+    const availableVoices = getAvailableVoices();
+    if (availableVoices.length > 0) {
       setVoices(availableVoices);
-    };
-
-    load();
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = load;
+      setIsLoading(false);
     }
-    return () => { 
-      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null; 
-    };
   }, []);
 
-  // 识别高品质音色逻辑优化
+  useEffect(() => {
+    loadVoices();
+    
+    // 某些浏览器需要一点时间加载语音包
+    const timer = setTimeout(loadVoices, 100);
+    const timerLong = setTimeout(loadVoices, 500);
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    
+    return () => { 
+      clearTimeout(timer);
+      clearTimeout(timerLong);
+      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null; 
+    };
+  }, [loadVoices]);
+
   const isHighQuality = (voice, allVoices) => {
     const uri = (voice.voiceURI || '').toLowerCase();
     const name = (voice.name || '').toLowerCase();
     
-    // 1. 直接特征匹配
     const hasQualityKeyword = [
       'enhanced', 'premium', 'plus', 'hi-fi', 'high', 'natural', 'online'
     ].some(keyword => uri.includes(keyword) || name.includes(keyword));
 
     if (hasQualityKeyword) return true;
 
-    // 2. 相对辨别逻辑 (iOS 特色)
-    // 如果存在多个同名音色，且当前这个的 URI 明显更复杂/长，通常它就是那个高质量版
     const siblings = allVoices.filter(v => v.name === voice.name && v.lang === voice.lang);
     if (siblings.length > 1) {
       const longestUri = siblings.reduce((prev, current) => 
@@ -62,8 +70,14 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <${Lucide.Globe} size=${16} /> 推荐音色 (精选英文)
             </label>
+            
             <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-              ${voices.map(v => {
+              ${isLoading && voices.length === 0 ? html`
+                <div className="flex flex-col items-center justify-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                  <div className="animate-spin text-indigo-600 mb-4"><${Lucide.Loader2} size=${32} /></div>
+                  <p className="text-sm text-slate-400">正在检索系统音色...</p>
+                </div>
+              ` : voices.map(v => {
                 const highQuality = isHighQuality(v, voices);
                 const isSelected = settings.voiceURI === v.voiceURI;
                 return html`
@@ -94,7 +108,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
                 `;
               })}
             </div>
-            <p className="text-[10px] text-slate-400 px-2 italic">提示：若看到多个同名音色，通常标注为“高级感”的音色发音更加自然。</p>
+            ${!isLoading && html`<p className="text-[10px] text-slate-400 px-2 italic">提示：若看到多个同名音色，通常标注为“高级感”的音色发音更加自然。</p>`}
           </section>
 
           <section className="space-y-4">

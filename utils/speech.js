@@ -3,29 +3,35 @@ export const getAvailableVoices = () => {
   if (typeof window === 'undefined' || !window.speechSynthesis) return [];
   
   const allVoices = window.speechSynthesis.getVoices();
-  
-  // 扩展白名单，包含更多常见的高品质音色系列
+  if (allVoices.length === 0) return [];
+
+  // 1. 定义优质关键词
   const recommendedNames = [
-    'samantha', 'jenny', 'ana', 'sonia', 'aria', 'guy', 'sarah', 'daniel', 'alex', 'karen'
+    'samantha', 'jenny', 'ana', 'sonia', 'aria', 'guy', 'sarah', 'daniel', 'alex', 'karen', 'apple', 'google'
   ];
 
-  const filtered = allVoices.filter(v => {
+  // 2. 尝试获取优质英文音色
+  let filtered = allVoices.filter(v => {
     const name = v.name.toLowerCase();
     const uri = (v.voiceURI || '').toLowerCase();
     const isEnglish = v.lang.startsWith('en');
     
-    // 基础过滤：英文 + 在白名单中
     const isRecommended = recommendedNames.some(rec => name.includes(rec));
-    // 排除明确标为低质量的 'compact' 版本
+    // 仅在有多个选择时才过滤 compact，防止列表变空
     const isNotCompact = !name.includes('compact') && !uri.includes('compact');
     
     return isEnglish && isRecommended && isNotCompact;
   });
 
-  // 排序：名称排序，如果名称相同，则 URI 较长的（通常包含 premium/enhanced 后缀）排在前面
+  // 3. 保底逻辑：如果优质列表为空，则返回所有英文音色（不过滤 compact）
+  if (filtered.length === 0) {
+    filtered = allVoices.filter(v => v.lang.startsWith('en'));
+  }
+
+  // 4. 排序：名称排序，同名时 URI 长的（高级版）排在前面
   return filtered.sort((a, b) => {
     if (a.name === b.name) {
-      return b.voiceURI.length - a.voiceURI.length;
+      return (b.voiceURI || '').length - (a.voiceURI || '').length;
     }
     return a.name.localeCompare(b.name);
   });
