@@ -4,20 +4,31 @@ export const getAvailableVoices = () => {
   
   const allVoices = window.speechSynthesis.getVoices();
   
-  // 恢复您最初要求的优质音色白名单
+  // 扩展白名单，包含更多常见的高品质音色系列
   const recommendedNames = [
-    'jenny', 'microsoft ana', 'sonia', 'samantha'
+    'samantha', 'jenny', 'ana', 'sonia', 'aria', 'guy', 'sarah', 'daniel', 'alex', 'karen'
   ];
 
-  return allVoices.filter(v => {
+  const filtered = allVoices.filter(v => {
     const name = v.name.toLowerCase();
+    const uri = (v.voiceURI || '').toLowerCase();
     const isEnglish = v.lang.startsWith('en');
-    // 逻辑：必须在白名单内，且过滤掉手机自带的低质量 'compact' 版本
+    
+    // 基础过滤：英文 + 在白名单中
     const isRecommended = recommendedNames.some(rec => name.includes(rec));
-    const isNotCompact = !name.includes('compact');
+    // 排除明确标为低质量的 'compact' 版本
+    const isNotCompact = !name.includes('compact') && !uri.includes('compact');
     
     return isEnglish && isRecommended && isNotCompact;
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  });
+
+  // 排序：名称排序，如果名称相同，则 URI 较长的（通常包含 premium/enhanced 后缀）排在前面
+  return filtered.sort((a, b) => {
+    if (a.name === b.name) {
+      return b.voiceURI.length - a.voiceURI.length;
+    }
+    return a.name.localeCompare(b.name);
+  });
 };
 
 export const speak = (text, voiceURI, rate) => {

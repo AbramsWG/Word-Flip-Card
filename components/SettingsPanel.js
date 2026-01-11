@@ -24,11 +24,29 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
     };
   }, []);
 
-  // 识别高品质音色：同时检测 URI 和名称，确保 iOS 系统音色能被识别
-  const isHighQuality = (voice) => {
+  // 识别高品质音色逻辑优化
+  const isHighQuality = (voice, allVoices) => {
     const uri = (voice.voiceURI || '').toLowerCase();
     const name = (voice.name || '').toLowerCase();
-    return uri.includes('enhanced') || uri.includes('premium') || name.includes('enhanced') || name.includes('premium');
+    
+    // 1. 直接特征匹配
+    const hasQualityKeyword = [
+      'enhanced', 'premium', 'plus', 'hi-fi', 'high', 'natural', 'online'
+    ].some(keyword => uri.includes(keyword) || name.includes(keyword));
+
+    if (hasQualityKeyword) return true;
+
+    // 2. 相对辨别逻辑 (iOS 特色)
+    // 如果存在多个同名音色，且当前这个的 URI 明显更复杂/长，通常它就是那个高质量版
+    const siblings = allVoices.filter(v => v.name === voice.name && v.lang === voice.lang);
+    if (siblings.length > 1) {
+      const longestUri = siblings.reduce((prev, current) => 
+        (prev.voiceURI.length > current.voiceURI.length) ? prev : current
+      );
+      return voice.voiceURI === longestUri.voiceURI;
+    }
+
+    return false;
   };
 
   return html`
@@ -40,14 +58,13 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
         </h2>
         
         <div className="space-y-10">
-          <!-- 语音选择：改为卡片列表以适配 iOS -->
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <${Lucide.Globe} size=${16} /> 推荐音色 (精选英文)
             </label>
-            <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
               ${voices.map(v => {
-                const highQuality = isHighQuality(v);
+                const highQuality = isHighQuality(v, voices);
                 const isSelected = settings.voiceURI === v.voiceURI;
                 return html`
                   <button 
@@ -59,25 +76,27 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
                         : 'border-slate-100 bg-slate-50 hover:border-indigo-200'
                     }`}
                   >
-                    <div className="flex flex-col">
-                      <span className=${`font-bold ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
+                    <div className="flex flex-col pr-4 overflow-hidden">
+                      <span className=${`font-bold truncate ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
                         ${v.name.replace(/Microsoft |Google |Apple /g, '')}
                       </span>
-                      <span className="text-xs text-slate-400">${v.lang}</span>
+                      <span className="text-[10px] text-slate-400 font-mono truncate">${v.voiceURI.split('.').pop()}</span>
                     </div>
-                    ${highQuality && html`
-                      <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded-full font-black flex items-center gap-1 shrink-0">
-                        ✨ 高级感
-                      </span>
-                    `}
-                    ${isSelected && html`<${Lucide.Check} size=${18} className="text-indigo-600 ml-2" />`}
+                    <div className="flex items-center gap-2 shrink-0">
+                      ${highQuality && html`
+                        <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-1 rounded-full font-black flex items-center gap-1">
+                          ✨ 高级感
+                        </span>
+                      `}
+                      ${isSelected && html`<${Lucide.Check} size=${18} className="text-indigo-600" />`}
+                    </div>
                   </button>
                 `;
               })}
             </div>
+            <p className="text-[10px] text-slate-400 px-2 italic">提示：若看到多个同名音色，通常标注为“高级感”的音色发音更加自然。</p>
           </section>
 
-          <!-- 语速控制 -->
           <section className="space-y-4">
             <div className="flex justify-between items-center">
               <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -93,7 +112,6 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             />
           </section>
 
-          <!-- 过滤选项 -->
           <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
             <div className="space-y-1">
               <span className="font-bold text-slate-700 flex items-center gap-2">
