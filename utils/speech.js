@@ -20,7 +20,7 @@ export const getAvailableVoices = () => {
 export const speak = (text, voiceURI, rate) => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(text.toLowerCase());
   const voices = window.speechSynthesis.getVoices();
   const selectedVoice = voices.find(v => v.voiceURI === voiceURI);
   if (selectedVoice) utterance.voice = selectedVoice;
