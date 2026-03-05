@@ -10,11 +10,11 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
   // 核心 Bug 修复：如果 word 不存在（在过滤瞬间可能发生），直接返回 null
   if (!word) return null;
 
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(settings.defaultSide === 'ENGLISH');
 
   useEffect(() => {
-    setIsFlipped(false);
-  }, [word.id]);
+    setIsFlipped(settings.defaultSide === 'ENGLISH');
+  }, [word.id, settings.defaultSide]);
 
   const handleFlip = useCallback(() => {
     setIsFlipped(v => !v);

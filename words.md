@@ -1,3 +1,4 @@
+***三年级上册***
 ---Unit 1---
 hello - 喂；你好
 hi - 嗨；你好 | （= hello）（非正式用语）
@@ -145,3 +146,128 @@ need  - 需要
 vegetable  - 蔬菜
 tomatoes with eggs - 西红柿炒鸡蛋
 What about ...?  - …… 怎么样？ | （用于提出建议） 
+
+***三年级下册***
+---Unit 1---
+in - 在……内；在……中
+on - (覆盖、附着) | 在……上
+under - 在 (或到、通过) | ……下面
+box - 盒；箱
+chair - 椅子
+computer - 计算机；电脑
+desk - 书桌
+blackboard - 黑板
+classroom - 教室；课堂
+door - 门
+floor - 地板；地面
+wall - 墙；壁；墙壁
+window - 窗；窗户
+guess - 猜测
+many - 许多
+book - 书；书籍
+love - 爱；热爱
+dirty - 脏的
+clean - 打扫
+help - 帮助
+great - 优秀的；杰出的
+today - 今天
+turn - (依次轮到的) 机会
+
+---Unit 2---
+one - 一
+two - 二
+three - 三
+four - 四
+five - 五
+six - 六
+seven - 七
+eight - 八
+nine - 九
+ten - 十
+eleven - 十一
+twelve - 十二
+class - 班；班级
+which - 哪一个
+grade - 年级
+student - 学生
+school - (中、小) 学校
+Well done! - 做得好！
+
+---Unit 3---
+father (dad) - 父亲; 爸爸
+mother (mum) - 母亲; | 妈妈
+baby - 婴儿
+brother - 哥哥; 弟弟
+baby brother - 弟弟
+sister - 姐姐; 妹妹
+me - 我
+aunt - 姑母; 姨母; 伯母; | 婶母; 舅母
+uncle - 舅父; 叔父; 伯父; | 姑父; 姨父
+grandfather (grandpa) - (外) 祖父; 爷爷; 姥爷; | 外公
+grandmother (grandma) - (外) 祖母; 奶奶; 姥姥; | 外婆
+family - 家, 家庭
+son - 儿子
+meet - 相遇; 遇见
+that - (指较远的人或 | 事物) 那, 那个
+daughter - 女儿
+who - 谁
+beautiful - 美丽的
+very much - 非常
+
+---Unit 4---
+cap - (尤指男用有帽舌的) | 便帽, 制服帽
+coat - 外套; 外衣; 大衣
+shirt - (尤指男式的) 衬衫
+sweater - 套头衫; 套头 | 毛衣
+T-shirt - T恤衫
+dress - 连衣裙
+shorts - 短裤
+skirt - 女裙
+sock - 短袜
+trousers - 裤子
+clothes - 衣服; 服装
+take - 携带; 拿走; 取走
+wash - 洗
+by myself - (我) 独立地
+shoe - 鞋
+by hand - 用手
+helpful - 有用的; 有帮助的
+home - 家; 住所
+
+---Unit 5---
+chicken - 鸡
+cow - 母牛; 奶牛
+duck - 鸭
+horse - 马
+sheep - 绵羊
+bee - 蜜蜂
+bird - 鸟
+fish - 鱼
+mouse - 老鼠
+pig - 猪
+rabbit - 兔子
+animal - 动物
+kid - 小孩
+here - 在这里; 向这里
+right - 正确的
+where - 哪里
+tree - 树; 树木
+heavy - 重的; 沉的
+grass - 草
+give - 给; 交给
+us - 我们
+
+---Unit 6---
+blue - 蓝色的
+brown - 棕色的; 褐色的
+green - 绿色的
+pink - 粉色的
+red - 红色的
+black - 黑色的
+orange - 橙色的
+white - 白色的
+yellow - 黄色的
+colour - (1) 颜色 | (2) (用颜料、 | 彩色笔等) | 为......着色
+draw - (用铅笔、钢笔或 | 粉笔) 画
+dream - 梦想; 理想
+garden - 花园; 果园; | 菜园

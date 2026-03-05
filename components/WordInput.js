@@ -6,11 +6,17 @@ import * as Lucide from 'lucide-react';
 const html = htm.bind(React.createElement);
 
 const WordInput = ({ initialWords, onSave }) => {
-  // 初始化时将 word 对象还原为带 Unit 标记的文本
+  // 初始化时将 word 对象还原为带 Grade 和 Unit 标记的文本
   const getInitialText = () => {
     let text = "";
+    let lastGrade = null;
     let lastUnit = null;
     initialWords.forEach(w => {
+      if (w.grade && w.grade !== lastGrade && w.grade !== '默认年级') {
+        text += `***${w.grade}***\n`;
+        lastGrade = w.grade;
+        lastUnit = null;
+      }
       if (w.unit && w.unit !== lastUnit && w.unit !== 'General') {
         text += `---${w.unit}---\n`;
         lastUnit = w.unit;
@@ -24,14 +30,18 @@ const WordInput = ({ initialWords, onSave }) => {
   
   const handleSave = () => {
     const lines = text.split('\n').filter(l => l.trim().length > 0);
+    let currentGrade = "默认年级";
     let currentUnit = "General";
     const newWords = [];
 
     lines.forEach((line, index) => {
       const trimmed = line.trim();
+      const gradeMatch = trimmed.match(/^\*\*\*(.+)\*\*\*$/);
       const unitMatch = trimmed.match(/---Unit\s*(\d+)---/i);
       
-      if (unitMatch) {
+      if (gradeMatch) {
+        currentGrade = gradeMatch[1];
+      } else if (unitMatch) {
         currentUnit = `Unit ${unitMatch[1]}`;
       } else if (trimmed.includes('-')) {
         const parts = trimmed.split('-').map(s => s.trim());
@@ -42,6 +52,7 @@ const WordInput = ({ initialWords, onSave }) => {
           english, 
           chinese, 
           mastered: false,
+          grade: currentGrade,
           unit: currentUnit
         });
       }
@@ -87,6 +98,7 @@ const WordInput = ({ initialWords, onSave }) => {
         />
         <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-dashed text-xs text-slate-500 leading-relaxed">
           <p className="font-bold mb-1 uppercase tracking-wider text-slate-400">支持格式：</p>
+          <code className="block mb-1">***三年级上册***</code>
           <code className="block mb-1">---Unit 1---</code>
           <code className="block">Apple - 苹果 | 沙果</code>
         </div>

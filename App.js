@@ -12,17 +12,46 @@ const html = htm.bind(React.createElement);
 const App = () => {
   const [view, setView] = useState('LEARN');
   const [words, setWords] = useState([]);
-  const [settings, setSettings] = useState({ speechRate: 1.0, voiceURI: '', hideMastered: false });
+  const [settings, setSettings] = useState({ 
+    speechRate: 1.0, 
+    voiceURI: '', 
+    hideMastered: false,
+    defaultSide: 'CHINESE' // 'CHINESE' or 'ENGLISH'
+  });
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // 学习进度持久化状态
+  const [learningProgress, setLearningProgress] = useState({
+    currentIndex: 0,
+    selectedGrade: '',
+    selectedUnits: []
+  });
+
   const voicesInitialized = useRef(false);
 
   useEffect(() => {
     const savedWords = localStorage.getItem('smart_vocab_words_v3');
     const savedSettings = localStorage.getItem('smart_vocab_settings_v3');
+    const savedProgress = localStorage.getItem('smart_vocab_progress_v3');
+    
     if (savedWords) setWords(JSON.parse(savedWords));
     if (savedSettings) setSettings(JSON.parse(savedSettings));
+    if (savedProgress) setLearningProgress(JSON.parse(savedProgress));
+    
     setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('smart_vocab_words_v3', JSON.stringify(words));
+      localStorage.setItem('smart_vocab_settings_v3', JSON.stringify(settings));
+      localStorage.setItem('smart_vocab_progress_v3', JSON.stringify(learningProgress));
+    }
+  }, [words, settings, learningProgress, isLoaded]);
+
+  const updateProgress = (newProgress) => {
+    setLearningProgress(prev => ({ ...prev, ...newProgress }));
+  };
 
   useEffect(() => {
     const initializeVoice = () => {
@@ -39,13 +68,6 @@ const App = () => {
     if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = initializeVoice;
   }, [settings.voiceURI]);
 
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('smart_vocab_words_v3', JSON.stringify(words));
-      localStorage.setItem('smart_vocab_settings_v3', JSON.stringify(settings));
-    }
-  }, [words, settings, isLoaded]);
-
   const toggleMastery = (id) => {
     setWords(prev => prev.map(w => w.id === id ? { ...w, mastered: !w.mastered } : w));
   };
@@ -54,6 +76,7 @@ const App = () => {
     try {
       const res = await fetch('./words.md');
       const text = await res.text();
+      let currentGrade = "默认年级";
       let currentUnit = "General";
       const defaultWords = [];
       
@@ -61,6 +84,13 @@ const App = () => {
         const trimmed = line.trim();
         if (!trimmed) return;
         
+        // 识别 Grade 标记 ***年级名称***
+        const gradeMatch = trimmed.match(/^\*\*\*(.+)\*\*\*$/);
+        if (gradeMatch) {
+          currentGrade = gradeMatch[1];
+          return;
+        }
+
         // 识别 Unit 标记
         const unitMatch = trimmed.match(/---Unit\s*(\d+)---/i);
         if (unitMatch) {
@@ -77,6 +107,7 @@ const App = () => {
             english: eng, 
             chinese: chi, 
             mastered: false,
+            grade: currentGrade,
             unit: currentUnit 
           });
         }
@@ -100,7 +131,15 @@ const App = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4">
-        ${view === 'LEARN' && html`<${FlashCardContainer} words=${words} settings=${settings} onToggleMastery=${toggleMastery} onGoToInput=${() => setView('INPUT')} onLoadDefault=${loadDefault} />`}
+        ${view === 'LEARN' && html`<${FlashCardContainer} 
+          words=${words} 
+          settings=${settings} 
+          progress=${learningProgress}
+          onUpdateProgress=${updateProgress}
+          onToggleMastery=${toggleMastery} 
+          onGoToInput=${() => setView('INPUT')} 
+          onLoadDefault=${loadDefault} 
+        />`}
         ${view === 'INPUT' && html`<${WordInput} initialWords=${words} onSave=${w => {setWords(w); setView('LEARN');}} />`}
         ${view === 'SETTINGS' && html`<${SettingsPanel} settings=${settings} onUpdateSettings=${setSettings} />`}
       </main>

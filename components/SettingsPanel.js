@@ -72,6 +72,27 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             />
           </section>
 
+          <!-- 默认显示面 -->
+          <section className="space-y-4">
+            <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <${Lucide.Layout} size=${16} /> 默认显示面
+            </label>
+            <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl border">
+              <button 
+                onClick=${() => onUpdateSettings({...settings, defaultSide: 'CHINESE'})}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'CHINESE' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                中文 (释义)
+              </button>
+              <button 
+                onClick=${() => onUpdateSettings({...settings, defaultSide: 'ENGLISH'})}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'ENGLISH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                英文 (单词)
+              </button>
+            </div>
+          </section>
+
           <!-- 过滤选项 -->
           <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
             <div className="space-y-1">
