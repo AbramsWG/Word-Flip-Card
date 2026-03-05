@@ -219,7 +219,7 @@ cap - 便帽, 制服帽 | (尤指男用有帽舌的)
 coat - 外套; 外衣; 大衣
 shirt - 衬衫 | (尤指男式的) 
 sweater - 套头衫; 套头 | 毛衣
-T-shirt - T恤衫
+T—shirt - T恤衫
 dress - 连衣裙
 shorts - 短裤
 skirt - 女裙
