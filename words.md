@@ -150,8 +150,8 @@ What about ...?  - …… 怎么样？ | （用于提出建议）
 ***三年级下册***
 ---Unit 1---
 in - 在……内；在……中
-on - (覆盖、附着) | 在……上
-under - 在 (或到、通过) | ……下面
+on - (覆盖、附着) 在……上
+under - 在 (或到、通过) ……下面
 box - 盒；箱
 chair - 椅子
 computer - 计算机；电脑
@@ -195,7 +195,7 @@ Well done! - 做得好！
 
 ---Unit 3---
 father (dad) - 父亲; 爸爸
-mother (mum) - 母亲; | 妈妈
+mother (mum) - 母亲; 妈妈
 baby - 婴儿
 brother - 哥哥; 弟弟
 baby brother - 弟弟
@@ -208,16 +208,16 @@ grandmother (grandma) - (外) 祖母; 奶奶; 姥姥; | 外婆
 family - 家, 家庭
 son - 儿子
 meet - 相遇; 遇见
-that - (指较远的人或 | 事物) 那, 那个
+that - 那, 那个 | (指较远的人或事物)
 daughter - 女儿
 who - 谁
 beautiful - 美丽的
 very much - 非常
 
 ---Unit 4---
-cap - (尤指男用有帽舌的) | 便帽, 制服帽
+cap - 便帽, 制服帽 | (尤指男用有帽舌的)
 coat - 外套; 外衣; 大衣
-shirt - (尤指男式的) 衬衫
+shirt - 衬衫 | (尤指男式的) 
 sweater - 套头衫; 套头 | 毛衣
 T-shirt - T恤衫
 dress - 连衣裙
@@ -267,7 +267,7 @@ black - 黑色的
 orange - 橙色的
 white - 白色的
 yellow - 黄色的
-colour - (1) 颜色 | (2) (用颜料、 | 彩色笔等) | 为......着色
-draw - (用铅笔、钢笔或 | 粉笔) 画
+colour - (1) 颜色 | (2) (用颜料、彩色笔等) 为......着色
+draw - 画 | (用铅笔、钢笔或粉笔)
 dream - 梦想; 理想
 garden - 花园; 果园; | 菜园
