@@ -10,7 +10,7 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
   // 核心 Bug 修复：如果 word 不存在（在过滤瞬间可能发生），直接返回 null
   if (!word) return null;
 
-  const [isFlipped, setIsFlipped] = useState(settings.defaultSide === 'ENGLISH');
+  const [isFlipped, setIsFlipped] = useState(settings.practiceMode ? false : settings.defaultSide === 'ENGLISH');
   const [userInput, setUserInput] = useState('');
   const [testResult, setTestResult] = useState(null); // null, 'correct', 'incorrect'
   const [isTested, setIsTested] = useState(false);
@@ -125,7 +125,6 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
                     placeholder="输入英文单词..."
                     className=${`w-full px-6 py-4 rounded-2xl border-2 outline-none transition-all font-bold text-center text-xl ${
                       testResult === 'correct' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 
-                      testResult === 'incorrect' ? 'border-rose-200 bg-rose-50/50 text-rose-400' : 
                       'border-emerald-900/10 bg-white/50 focus:border-[#87D2B2] focus:bg-white'
                     }`}
                     onKeyDown=${e => e.key === 'Enter' && handleTest(e)}
@@ -134,7 +133,7 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
                     <div className="absolute -right-12 top-1/2 -translate-y-1/2">
                       ${testResult === 'correct' ? 
                         html`<${Lucide.CheckCircle2} className="text-emerald-500 animate-bounce" size=${32} />` : 
-                        html`<${Lucide.XCircle} className="text-rose-300 animate-shake" size=${32} />`
+                        html`<${Lucide.XCircle} className="text-white fill-orange-500 animate-shake" size=${32} />`
                       }
                     </div>
                   `}
@@ -143,7 +142,6 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
                   onClick=${handleTest}
                   className=${`mt-6 p-5 sm:p-6 rounded-full shadow-lg border transition-all active:scale-90 flex items-center justify-center ${
                     testResult === 'correct' ? 'bg-emerald-100/80 text-emerald-600 border-emerald-200/50' : 
-                    testResult === 'incorrect' ? 'bg-rose-100/80 text-rose-400 border-rose-100/50' : 
                     'bg-white/40 text-emerald-900/30 border-emerald-900/5 hover:bg-white/60 hover:text-emerald-900/50'
                   }`}
                 >
