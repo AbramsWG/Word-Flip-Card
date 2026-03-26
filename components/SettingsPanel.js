@@ -40,7 +40,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             </label>
             <div className="relative">
               <select 
-                value=${settings.voiceURI} 
+                value=${settings.voiceURI || ''} 
                 onChange=${e => onUpdateSettings({...settings, voiceURI: e.target.value})} 
                 className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none text-slate-700 font-medium"
               >
@@ -66,7 +66,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             </div>
             <input 
               type="range" min="0.5" max="2" step="0.1" 
-              value=${settings.speechRate} 
+              value=${settings.speechRate || 1.0} 
               onChange=${e => onUpdateSettings({...settings, speechRate: parseFloat(e.target.value)})} 
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
             />
@@ -91,6 +91,25 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
                 英文 (单词)
               </button>
             </div>
+          </section>
+
+          <!-- 练习模式 -->
+          <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
+            <div className="space-y-1">
+              <span className="font-bold text-slate-700 flex items-center gap-2">
+                <${Lucide.Edit3} size=${18} /> 练习模式 (拼写测试)
+              </span>
+              <p className="text-xs text-slate-400">开启后需正确输入英文单词才能翻转卡片</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked=${settings.practiceMode} 
+                onChange=${e => onUpdateSettings({...settings, practiceMode: e.target.checked})} 
+                className="sr-only peer"
+              />
+              <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
           </section>
 
           <!-- 过滤选项 -->

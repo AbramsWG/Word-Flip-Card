@@ -11,14 +11,54 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
   if (!word) return null;
 
   const [isFlipped, setIsFlipped] = useState(settings.defaultSide === 'ENGLISH');
+  const [userInput, setUserInput] = useState('');
+  const [testResult, setTestResult] = useState(null); // null, 'correct', 'incorrect'
+  const [isTested, setIsTested] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [prevWordId, setPrevWordId] = useState(word.id);
+
+  // 核心修复：在渲染期间直接检测 ID 变化
+  if (word.id !== prevWordId) {
+    setPrevWordId(word.id);
+    setIsSwitching(true);
+    // 同步重置状态，防止渲染旧状态
+    if (settings.practiceMode) {
+      setIsFlipped(false);
+    } else {
+      setIsFlipped(settings.defaultSide === 'ENGLISH');
+    }
+    setUserInput('');
+    setTestResult(null);
+    setIsTested(false);
+  }
 
   useEffect(() => {
-    setIsFlipped(settings.defaultSide === 'ENGLISH');
-  }, [word.id, settings.defaultSide]);
+    // 仅负责在动画结束后关闭“障眼法”
+    if (isSwitching) {
+      const timer = setTimeout(() => setIsSwitching(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isSwitching]);
 
   const handleFlip = useCallback(() => {
+    if (settings.practiceMode && !isTested && !isFlipped) {
+      // 在练习模式下，如果还没测试且当前是正面，不允许翻转
+      return;
+    }
     setIsFlipped(v => !v);
-  }, []);
+  }, [settings.practiceMode, isTested, isFlipped]);
+
+  const handleTest = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isCorrect = userInput.trim().toLowerCase() === word.english.trim().toLowerCase();
+    setTestResult(isCorrect ? 'correct' : 'incorrect');
+    setIsTested(true);
+    if (isCorrect) {
+      // 如果正确，延迟一小会儿自动翻转
+      setTimeout(() => setIsFlipped(true), 800);
+    }
+  };
 
   const handleAction = (e, action) => {
     e.preventDefault();
@@ -65,15 +105,56 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 z-10 pointer-events-none">
-            <div className="flex flex-col items-center gap-4">
-              ${word.chinese.split('\n').map((line, i) => html`
-                <p key=${i} className=${i === 0 ? "text-3xl sm:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight" : "text-lg sm:text-2xl font-medium text-slate-700 leading-snug max-w-[90%] opacity-80 border-t border-emerald-900/10 pt-2"}>
-                  ${line}
-                </p>
-              `)}
-            </div>
+            ${(isSwitching && settings.defaultSide === 'ENGLISH') ? null : html`
+              <div className="flex flex-col items-center gap-4">
+                ${word.chinese.split('\n').map((line, i) => html`
+                  <p key=${i} className=${i === 0 ? "text-3xl sm:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight" : "text-lg sm:text-2xl font-medium text-slate-700 leading-snug max-w-[90%] opacity-80 border-t border-emerald-900/10 pt-2"}>
+                    ${line}
+                  </p>
+                `)}
+              </div>
+            `}
+
+            ${settings.practiceMode && html`
+              <div className="mt-8 w-full max-w-xs pointer-events-auto flex flex-col items-center" onClick=${stopPropagation}>
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value=${userInput || ''}
+                    onChange=${e => setUserInput(e.target.value)}
+                    placeholder="输入英文单词..."
+                    className=${`w-full px-6 py-4 rounded-2xl border-2 outline-none transition-all font-bold text-center text-xl ${
+                      testResult === 'correct' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 
+                      testResult === 'incorrect' ? 'border-rose-200 bg-rose-50/50 text-rose-400' : 
+                      'border-emerald-900/10 bg-white/50 focus:border-[#87D2B2] focus:bg-white'
+                    }`}
+                    onKeyDown=${e => e.key === 'Enter' && handleTest(e)}
+                  />
+                  ${testResult && html`
+                    <div className="absolute -right-12 top-1/2 -translate-y-1/2">
+                      ${testResult === 'correct' ? 
+                        html`<${Lucide.CheckCircle2} className="text-emerald-500 animate-bounce" size=${32} />` : 
+                        html`<${Lucide.XCircle} className="text-rose-300 animate-shake" size=${32} />`
+                      }
+                    </div>
+                  `}
+                </div>
+                <button
+                  onClick=${handleTest}
+                  className=${`mt-6 p-5 sm:p-6 rounded-full shadow-lg border transition-all active:scale-90 flex items-center justify-center ${
+                    testResult === 'correct' ? 'bg-emerald-100/80 text-emerald-600 border-emerald-200/50' : 
+                    testResult === 'incorrect' ? 'bg-rose-100/80 text-rose-400 border-rose-100/50' : 
+                    'bg-white/40 text-emerald-900/30 border-emerald-900/5 hover:bg-white/60 hover:text-emerald-900/50'
+                  }`}
+                >
+                  <${Lucide.Zap} size=${32} />
+                </button>
+              </div>
+            `}
           </div>
-          <div className="text-center text-emerald-900/40 text-sm font-bold z-10 animate-pulse pointer-events-none">点击翻转</div>
+          <div className="text-center text-emerald-900/40 text-sm font-bold z-10 animate-pulse pointer-events-none">
+            ${settings.practiceMode && !isTested ? '请先完成拼写测试' : '点击翻转'}
+          </div>
         </div>
 
         <!-- 反面: 英文 -->
@@ -100,16 +181,19 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center text-center px-2 z-10 relative">
-            <h3 className=${`font-extrabold tracking-tight mb-8 leading-tight break-words hyphens-auto ${getFontSizeClass(word.english)}`}>
-              ${word.english}
-            </h3>
-            <button
-              onClick=${(e) => handleAction(e, () => speak(word.english, settings.voiceURI, settings.speechRate))}
-              onPointerDown=${stopPropagation}
-              className="p-6 sm:p-8 bg-white/20 hover:bg-white/30 rounded-full transition-all group/speak active:scale-90 shadow-lg relative z-40"
-            >
-              <${Lucide.Volume2} size=${40} className="sm:w-11 sm:h-11 group-hover/speak:scale-110 transition-transform" />
-            </button>
+            ${(isSwitching && settings.defaultSide === 'CHINESE') ? null : html`
+              <h3 key="word-eng" className=${`font-extrabold tracking-tight mb-8 leading-tight break-words hyphens-auto ${getFontSizeClass(word.english)}`}>
+                ${word.english}
+              </h3>
+              <button
+                key="word-audio"
+                onClick=${(e) => handleAction(e, () => speak(word.english, settings.voiceURI, settings.speechRate))}
+                onPointerDown=${stopPropagation}
+                className="p-6 sm:p-8 bg-white/20 hover:bg-white/30 rounded-full transition-all group/speak active:scale-90 shadow-lg relative z-40"
+              >
+                <${Lucide.Volume2} size=${40} className="sm:w-11 sm:h-11 group-hover/speak:scale-110 transition-transform" />
+              </button>
+            `}
           </div>
           <div className="text-center text-indigo-100 text-sm font-bold z-10 pointer-events-none">返回解释</div>
         </div>

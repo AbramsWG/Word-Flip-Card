@@ -31,6 +31,13 @@
         .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
         .card-height { height: 500px; }
         @media (max-width: 640px) { .card-height { height: 420px; } }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
 
     <script type="importmap">

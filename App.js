@@ -16,7 +16,8 @@ const App = () => {
     speechRate: 1.0, 
     voiceURI: '', 
     hideMastered: false,
-    defaultSide: 'CHINESE' // 'CHINESE' or 'ENGLISH'
+    defaultSide: 'CHINESE', // 'CHINESE' or 'ENGLISH'
+    practiceMode: false
   });
   const [isLoaded, setIsLoaded] = useState(false);
   

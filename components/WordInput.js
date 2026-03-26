@@ -91,7 +91,7 @@ const WordInput = ({ initialWords, onSave }) => {
           </div>
         </div>
         <textarea 
-          value=${text} 
+          value=${text || ''} 
           onChange=${(e) => setText(e.target.value)} 
           placeholder="请输入单词，格式：单词 - 解释"
           className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-100 outline-none resize-none font-mono text-slate-700 transition-all" 
