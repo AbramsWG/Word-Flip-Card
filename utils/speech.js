@@ -19,7 +19,7 @@ export const getAvailableVoices = () => {
   return premium.length > 0 ? premium : enVoices;
 };
 
-export const speak = (text, voiceURI, rate) => {
+export const speak = (text, voiceURI, rate, onEnd) => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text.toLowerCase());
@@ -28,5 +28,6 @@ export const speak = (text, voiceURI, rate) => {
   if (selectedVoice) utterance.voice = selectedVoice;
   utterance.rate = rate || 1.0;
   utterance.lang = 'en-US';
+  if (onEnd) utterance.onend = onEnd;
   window.speechSynthesis.speak(utterance);
 };

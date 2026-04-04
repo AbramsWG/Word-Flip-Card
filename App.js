@@ -17,7 +17,8 @@ const App = () => {
     voiceURI: '', 
     hideMastered: false,
     defaultSide: 'CHINESE', // 'CHINESE' or 'ENGLISH'
-    practiceMode: false
+    practiceMode: false,
+    spellOutLoud: false
   });
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -36,8 +37,14 @@ const App = () => {
     const savedProgress = localStorage.getItem('smart_vocab_progress_v3');
     
     if (savedWords) setWords(JSON.parse(savedWords));
-    if (savedSettings) setSettings(JSON.parse(savedSettings));
-    if (savedProgress) setLearningProgress(JSON.parse(savedProgress));
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings);
+      setSettings(prev => ({ ...prev, ...parsed }));
+    }
+    if (savedProgress) {
+      const parsed = JSON.parse(savedProgress);
+      setLearningProgress(prev => ({ ...prev, ...parsed }));
+    }
     
     setIsLoaded(true);
   }, []);

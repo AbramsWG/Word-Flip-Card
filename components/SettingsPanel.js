@@ -104,8 +104,27 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked=${settings.practiceMode} 
+                checked=${!!settings.practiceMode} 
                 onChange=${e => onUpdateSettings({...settings, practiceMode: e.target.checked})} 
+                className="sr-only peer"
+              />
+              <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </section>
+
+          <!-- 逐字母朗读 -->
+          <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
+            <div className="space-y-1">
+              <span className="font-bold text-slate-700 flex items-center gap-2">
+                <${Lucide.Type} size=${18} /> 逐字母朗读 (拼读)
+              </span>
+              <p className="text-xs text-slate-400">朗读完单词后自动拼读每个字母并高亮</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked=${!!settings.spellOutLoud} 
+                onChange=${e => onUpdateSettings({...settings, spellOutLoud: e.target.checked})} 
                 className="sr-only peer"
               />
               <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
@@ -122,7 +141,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
-                checked=${settings.hideMastered} 
+                checked=${!!settings.hideMastered} 
                 onChange=${e => onUpdateSettings({...settings, hideMastered: e.target.checked})} 
                 className="sr-only peer"
               />

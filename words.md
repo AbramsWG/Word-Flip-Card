@@ -145,7 +145,7 @@ dinner  - 主餐，正餐
 need  - 需要
 vegetable  - 蔬菜
 tomatoes with eggs - 西红柿炒鸡蛋
-What about ...?  - …… 怎么样？ | （用于提出建议） 
+What about...?  - …… 怎么样？ | （用于提出建议） 
 
 ***三年级下册***
 ---Unit 1---
