@@ -91,7 +91,11 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
   const handleTest = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const isCorrect = userInput.trim().toLowerCase() === word.english.trim().toLowerCase();
+    
+    // 标准化处理：转小写，移除标点符号（保留空格），去除首尾空格
+    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+    
+    const isCorrect = normalize(userInput) === normalize(word.english);
     setTestResult(isCorrect ? 'correct' : 'incorrect');
     setIsTested(true);
     if (isCorrect) {

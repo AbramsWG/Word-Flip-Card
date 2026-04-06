@@ -50,6 +50,12 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    if (isLoaded && settings.practiceMode && settings.defaultSide !== 'CHINESE') {
+      setSettings(prev => ({ ...prev, defaultSide: 'CHINESE' }));
+    }
+  }, [settings.practiceMode, settings.defaultSide, isLoaded]);
+
+  useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('smart_vocab_words_v3', JSON.stringify(words));
       localStorage.setItem('smart_vocab_settings_v3', JSON.stringify(settings));

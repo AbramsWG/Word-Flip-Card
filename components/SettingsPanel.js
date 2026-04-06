@@ -74,19 +74,24 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
 
           <!-- 默认显示面 -->
           <section className="space-y-4">
-            <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <${Lucide.Layout} size=${16} /> 默认显示面
-            </label>
-            <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl border">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <${Lucide.Layout} size=${16} /> 默认显示面
+              </label>
+              ${settings.practiceMode && html`<span className="text-[10px] bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full font-bold animate-pulse">练习模式已锁定</span>`}
+            </div>
+            <div className=${`flex gap-2 p-1 bg-slate-100 rounded-2xl border transition-opacity ${settings.practiceMode ? 'opacity-60 grayscale-[0.5]' : ''}`}>
               <button 
+                disabled=${settings.practiceMode}
                 onClick=${() => onUpdateSettings({...settings, defaultSide: 'CHINESE'})}
-                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${settings.defaultSide === 'CHINESE' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'CHINESE' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'} ${settings.practiceMode ? 'cursor-not-allowed' : ''}`}
               >
                 中文 (释义)
               </button>
               <button 
+                disabled=${settings.practiceMode}
                 onClick=${() => onUpdateSettings({...settings, defaultSide: 'ENGLISH'})}
-                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${settings.defaultSide === 'ENGLISH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'ENGLISH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'} ${settings.practiceMode ? 'cursor-not-allowed' : ''}`}
               >
                 英文 (单词)
               </button>
@@ -105,7 +110,14 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
               <input 
                 type="checkbox" 
                 checked=${!!settings.practiceMode} 
-                onChange=${e => onUpdateSettings({...settings, practiceMode: e.target.checked})} 
+                onChange=${e => {
+                  const isChecked = e.target.checked;
+                  onUpdateSettings({
+                    ...settings, 
+                    practiceMode: isChecked,
+                    ...(isChecked ? { defaultSide: 'CHINESE' } : {})
+                  });
+                }} 
                 className="sr-only peer"
               />
               <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
