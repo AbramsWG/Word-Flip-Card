@@ -42,7 +42,7 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
               <select 
                 value=${settings.voiceURI || ''} 
                 onChange=${e => onUpdateSettings({...settings, voiceURI: e.target.value})} 
-                className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all cursor-pointer appearance-none text-slate-700 font-medium"
+                className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium"
               >
                 ${voices.map(v => html`
                   <option key=${v.voiceURI} value=${v.voiceURI}>
@@ -80,13 +80,13 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl border">
               <button 
                 onClick=${() => onUpdateSettings({...settings, defaultSide: 'CHINESE'})}
-                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'CHINESE' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${settings.defaultSide === 'CHINESE' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 中文 (释义)
               </button>
               <button 
                 onClick=${() => onUpdateSettings({...settings, defaultSide: 'ENGLISH'})}
-                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${settings.defaultSide === 'ENGLISH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className=${`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${settings.defaultSide === 'ENGLISH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 英文 (单词)
               </button>

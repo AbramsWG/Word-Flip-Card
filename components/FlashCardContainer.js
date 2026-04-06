@@ -109,7 +109,7 @@ const FlashCardContainer = ({ words, settings, progress, onUpdateProgress, onTog
               <button 
                 key=${grade}
                 onClick=${() => handleGradeChange(grade)}
-                className=${`px-6 py-2 rounded-xl text-sm font-bold transition-all ${selectedGrade === grade ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}`}
+                className=${`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${selectedGrade === grade ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}`}
               >
                 ${grade}
               </button>
@@ -132,7 +132,7 @@ const FlashCardContainer = ({ words, settings, progress, onUpdateProgress, onTog
                 <button 
                   key=${unit}
                   onClick=${() => toggleUnit(unit)}
-                  className=${`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isStrictlySelected ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}`}
+                  className=${`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${isStrictlySelected ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}`}
                 >
                   ${unit}
                 </button>
@@ -143,7 +143,7 @@ const FlashCardContainer = ({ words, settings, progress, onUpdateProgress, onTog
       `}
 
       <div className="w-full flex items-center justify-between px-2 sm:px-12 mt-4">
-        <button onClick=${handlePrev} className="p-4 bg-white rounded-full shadow-lg border active:scale-90 transition-all text-slate-600 shrink-0"><${Lucide.ChevronLeft} size=${32} /></button>
+        <button onClick=${handlePrev} className="p-4 bg-white rounded-full shadow-lg border transition-colors text-slate-600 shrink-0"><${Lucide.ChevronLeft} size=${32} /></button>
         
         <div className="flex-1 max-w-md mx-4">
           ${displayWords.length > 0 
@@ -158,14 +158,14 @@ const FlashCardContainer = ({ words, settings, progress, onUpdateProgress, onTog
           }
         </div>
 
-        <button onClick=${handleNext} className="p-4 bg-white rounded-full shadow-lg border active:scale-90 transition-all text-slate-600 shrink-0"><${Lucide.ChevronRight} size=${32} /></button>
+        <button onClick=${handleNext} className="p-4 bg-white rounded-full shadow-lg border transition-colors text-slate-600 shrink-0"><${Lucide.ChevronRight} size=${32} /></button>
       </div>
 
       ${displayWords.length > 0 && html`
         <div className="flex flex-col items-center gap-2 mt-4">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">${currentIndex + 1} / ${displayWords.length}</div>
           <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden shadow-inner">
-            <div className="h-full bg-indigo-600 transition-all duration-500" style=${{ width: `${((currentIndex + 1) / displayWords.length) * 100}%` }} />
+            <div className="h-full bg-indigo-600" style=${{ width: `${((currentIndex + 1) / displayWords.length) * 100}%` }} />
           </div>
         </div>
       `}

@@ -132,9 +132,9 @@ const App = () => {
           <h1 className="text-xl font-black text-slate-800 hidden sm:block">Smart Vocab</h1>
         </div>
         <nav className="flex gap-1 bg-slate-100 p-1 rounded-2xl border">
-          <button onClick=${() => setView('LEARN')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-all ${view==='LEARN' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>学习</button>
-          <button onClick=${() => setView('INPUT')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-all ${view==='INPUT' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>词库</button>
-          <button onClick=${() => setView('SETTINGS')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-all ${view==='SETTINGS' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>设置</button>
+          <button onClick=${() => setView('LEARN')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${view==='LEARN' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>学习</button>
+          <button onClick=${() => setView('INPUT')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${view==='INPUT' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>词库</button>
+          <button onClick=${() => setView('SETTINGS')} className=${`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${view==='SETTINGS' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>设置</button>
         </nav>
       </header>
 

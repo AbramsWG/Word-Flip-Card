@@ -76,7 +76,7 @@ const WordInput = ({ initialWords, onSave }) => {
               type="button"
               onPointerDown=${handleClear}
               onClick=${handleClear} 
-              className="px-6 py-3 border border-red-200 text-red-500 font-bold rounded-2xl hover:bg-red-50 active:scale-95 transition-all flex items-center gap-2"
+              className="px-6 py-3 border border-red-200 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition-colors flex items-center gap-2"
             >
               <${Lucide.Trash2} size=${18} />
               清空
@@ -84,7 +84,7 @@ const WordInput = ({ initialWords, onSave }) => {
             <button 
               type="button"
               onClick=${handleSave} 
-              className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 active:scale-95 transition-all"
+              className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition-colors"
             >
               保存
             </button>

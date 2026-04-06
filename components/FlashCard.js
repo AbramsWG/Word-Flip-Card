@@ -7,22 +7,25 @@ import { speak } from '../utils/speech.js';
 const html = htm.bind(React.createElement);
 
 const FlashCard = ({ word, settings, onToggleMastery }) => {
+  // 核心 Bug 修复：如果 word 不存在（在过滤瞬间可能发生），直接返回 null
   if (!word) return null;
 
   const [isFlipped, setIsFlipped] = useState(settings.practiceMode ? false : settings.defaultSide === 'ENGLISH');
   const [userInput, setUserInput] = useState('');
-  const [testResult, setTestResult] = useState(null);
+  const [testResult, setTestResult] = useState(null); // null, 'correct', 'incorrect'
   const [isTested, setIsTested] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [prevWordId, setPrevWordId] = useState(word.id);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const spellingSessionRef = useRef(0);
 
+  // 核心修复：在渲染期间直接检测 ID 变化
   if (word.id !== prevWordId) {
     setPrevWordId(word.id);
     setIsSwitching(true);
     setHighlightedIndex(-1);
     spellingSessionRef.current++;
+    // 同步重置状态，防止渲染旧状态
     if (settings.practiceMode) {
       setIsFlipped(false);
     } else {
@@ -34,12 +37,14 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
   }
 
   useEffect(() => {
+    // 仅负责在动画结束后关闭“障眼法”
     if (isSwitching) {
       const timer = setTimeout(() => setIsSwitching(false), 700);
       return () => clearTimeout(timer);
     }
   }, [isSwitching]);
 
+  // 当翻转或切换时停止拼读
   useEffect(() => {
     if (!isFlipped) {
       setHighlightedIndex(-1);
@@ -49,6 +54,7 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
 
   const handleFlip = useCallback(() => {
     if (settings.practiceMode && !isTested && !isFlipped) {
+      // 在练习模式下，如果还没测试且当前是正面，不允许翻转
       return;
     }
     setIsFlipped(v => !v);
@@ -89,14 +95,16 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
     setTestResult(isCorrect ? 'correct' : 'incorrect');
     setIsTested(true);
     if (isCorrect) {
+      // 如果正确，延迟一小会儿自动翻转并朗读
       setTimeout(() => {
         setIsFlipped(true);
         handleSpeak(word.english);
-      }, 600);
+      }, 800);
     }
   };
 
   const handleAction = (e, action) => {
+    e.preventDefault();
     e.stopPropagation();
     action();
   };
@@ -109,8 +117,7 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
     const len = text.length;
     if (len < 15) return 'text-5xl sm:text-7xl';
     if (len < 25) return 'text-4xl sm:text-5xl';
-    if (len < 40) return 'text-2xl sm:text-3xl';
-    return 'text-xl sm:text-2xl';
+    return 'text-2xl sm:text-3xl';
   };
 
   return html`
@@ -121,14 +128,14 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
         <div 
           onClick=${handleFlip}
           style=${{ zIndex: isFlipped ? 0 : 10 }}
-          className=${`absolute inset-0 w-full h-full backface-hidden bg-white rounded-[2.5rem] shadow-2xl border-2 border-emerald-100 flex flex-col p-8 sm:p-10 cursor-pointer transition-all duration-300 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
+          className=${`absolute inset-0 w-full h-full backface-hidden bg-[#A7F3D0] rounded-[2.5rem] shadow-2xl border border-[#A7F3D0] flex flex-col p-8 sm:p-10 overflow-hidden cursor-pointer transition-all duration-300 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
         >
-          <div className="absolute top-0 right-0 p-8 text-emerald-900/5 pointer-events-none">
+          <div className="absolute top-0 right-0 p-8 text-emerald-900 opacity-5 pointer-events-none">
             <${Lucide.BrainCircuit} size=${180} />
           </div>
 
           <div className="flex justify-between items-start relative z-30">
-            <div className="bg-emerald-900/5 p-2.5 rounded-xl text-emerald-900/40">
+            <div className="bg-emerald-900/10 p-2.5 rounded-xl text-emerald-900">
               <${Lucide.BrainCircuit} size=${28} />
             </div>
             <button 
@@ -214,16 +221,20 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
             </button>
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 z-10 relative">
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-2 z-10 relative">
             ${(isSwitching && settings.defaultSide === 'CHINESE') ? null : html`
               <h3 key="word-eng" className=${`font-extrabold tracking-tight mb-8 leading-tight break-words hyphens-auto flex flex-wrap justify-center items-center ${getFontSizeClass(word.english)}`}>
                 ${word.english.split(/(\s+)/).map((segment, sIndex) => {
+                  // 如果是空格，直接渲染
                   if (/^\s+$/.test(segment)) {
                     return html`<span key=${`s-${sIndex}`} className="inline-block whitespace-pre">\u00A0</span>`;
                   }
+                  
+                  // 如果是单词，包裹在一个 inline-block 容器中防止内部换行
                   return html`
                     <span key=${`w-${sIndex}`} className="inline-block whitespace-nowrap">
                       ${segment.split('').map((char, cIndex) => {
+                        // 计算该字符在原始字符串中的真实索引
                         const absoluteIndex = word.english.substring(0, word.english.indexOf(segment, word.english.split(/(\s+)/).slice(0, sIndex).join('').length) + cIndex).length;
                         const isLetter = /[a-zA-Z]/.test(char);
                         const letterIndex = isLetter ? word.english.substring(0, absoluteIndex).replace(/[^a-zA-Z]/g, '').length : -1;
@@ -232,7 +243,7 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
                         return html`
                           <span 
                             key=${cIndex} 
-                            className=${`inline-block ${isHighlighted ? 'transition-all duration-200 text-yellow-300 scale-125' : ''}`}
+                            className=${`transition duration-200 ${isHighlighted ? 'text-yellow-300 scale-125 inline-block' : ''}`}
                           >
                             ${char}
                           </span>
