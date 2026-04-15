@@ -194,8 +194,8 @@ school - (中、小) 学校
 Well done! - 做得好！
 
 ---Unit 3---
-father (dad) - 父亲; 爸爸
-mother (mum) - 母亲; 妈妈
+father - (dad) 父亲; 爸爸
+mother - (mum) 母亲; 妈妈
 baby - 婴儿
 brother - 哥哥; 弟弟
 baby brother - 弟弟
@@ -203,8 +203,8 @@ sister - 姐姐; 妹妹
 me - 我
 aunt - 姑母; 姨母; 伯母; | 婶母; 舅母
 uncle - 舅父; 叔父; 伯父; | 姑父; 姨父
-grandfather (grandpa) - (外) 祖父; 爷爷; 姥爷; | 外公
-grandmother (grandma) - (外) 祖母; 奶奶; 姥姥; | 外婆
+grandfather - (grandpa) (外) 祖父; 爷爷; 姥爷; | 外公
+grandmother - (grandma) (外) 祖母; 奶奶; 姥姥; | 外婆
 family - 家, 家庭
 son - 儿子
 meet - 相遇; 遇见
