@@ -271,3 +271,133 @@ colour - (1) 颜色 | (2) (用颜料、彩色笔等) 为......着色
 draw - 画 | (用铅笔、钢笔或粉笔)
 dream - 梦想; 理想
 garden - 花园; 果园; | 菜园
+
+***四年级上册***
+---Unit 1---
+jump - 跳
+rope - 绳
+swim - 游泳
+run - 跑; 跑步
+play - 参加（体育运动 | 游戏、比赛等）
+ping—pong - 乒乓球
+basketball - 篮球
+football - 足球
+once - 一次
+week - 一周
+twice - 两次
+time - 次
+every - 每
+day - 一天
+sport - 体育运动
+make - 使变得; | 结成（朋友）
+be good at - 擅长
+from - 来自
+the USA - 美国
+China - 中国
+
+---Unit 2---
+dance - 跳舞
+play - 演奏 (乐器)
+guitar - 吉他
+paint - (用颜料) 画
+listen - 听
+music - 音乐; 乐曲
+collect - 收集
+stamp - 邮票
+weiqi - 围棋
+read - 读; 阅读
+story - 故事
+practise - 练习
+kung fu - 功夫
+drum - 鼓
+hobby - 业余爱好
+these - 这些
+any - 任何的; 任一的
+fishing - 钓鱼
+eat - 吃; 吃饭
+
+---Unit 3---
+hot - 温度高的; 热的
+warm - 温暖的
+cool - 凉的；凉爽的
+cold - 寒冷的
+sunny - 阳光充足的； | 阳光灿烂的
+rainy - 多雨的
+cloudy - 多云的；阴的
+snowy - 下雪多的
+windy - 多风的
+weather - 天气
+how - 怎么样
+there - 在那里
+should - (提出建议) | 应该
+sometimes - 有时候
+also - 也；还
+umbrella - 伞
+will - 将；会
+put on - 穿上；戴上
+
+---Unit 4---
+go - 去
+boating - 划船
+fly - 放飞；飞
+snowman - 雪人
+bookshop - 书店
+library - 图书馆
+cinema - 电影院
+museum - 博物馆
+sports centre - 体育中心
+fine - (天气) | 晴朗的
+too - 太；过于
+now - 现在
+after - (时间) | 在......后
+all kinds of - 各种各样的
+when - 当......的时候
+park - 公园
+
+---Unit 5---
+bear - 熊
+panda - 大熊猫
+tiger - 老虎
+elephant - 大象
+monkey - 猴子
+lion - 狮子
+arm - 手臂
+foot - 脚
+leg - 腿
+body - 身体
+tail - 尾巴
+head - 头
+favourite - 最喜欢的
+fast - 快的；迅速的
+clever - 聪明的
+its - 它的
+pet - 宠物
+meat - (食用) 肉
+slow - 缓慢的; 迟缓的
+
+---Unit 6---
+thirteen - 十三
+fourteen - 十四
+fifteen - 十五
+sixteen - 十六
+seventeen - 十七
+eighteen - 十八
+nineteen - 十九
+twenty - 二十
+thirty - 三十
+forty - 四十
+fifty - 五十
+get up - 起床
+time - 时间
+clock - 时钟
+have to - 必须; 不得不
+get to - 到达
+before - 在......之前
+hurry up - (用于催促) | 赶紧
+at - 在 (某时刻)
+o'clock - ......点钟
+breakfast - 早餐; 早饭
+over - 结束
+half - 半; 一半
+hour - 小时
+go to bed - 上床睡觉
