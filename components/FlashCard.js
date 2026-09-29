@@ -168,6 +168,11 @@ const FlashCard = ({ word, settings, onToggleMastery }) => {
                   <input
                     type="text"
                     value=${userInput || ''}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    autoComplete="off"
+                    spellCheck="false"
+                    enterKeyHint="done"
                     onChange=${e => setUserInput(e.target.value)}
                     placeholder="输入英文单词..."
                     className=${`w-full px-6 py-4 rounded-2xl border-2 outline-none transition-all font-bold text-center text-xl ${

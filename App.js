@@ -58,10 +58,20 @@ const App = () => {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('smart_vocab_words_v3', JSON.stringify(words));
+    }
+  }, [words, isLoaded]);
+
+  useEffect(() => {
+    if (isLoaded) {
       localStorage.setItem('smart_vocab_settings_v3', JSON.stringify(settings));
+    }
+  }, [settings, isLoaded]);
+
+  useEffect(() => {
+    if (isLoaded) {
       localStorage.setItem('smart_vocab_progress_v3', JSON.stringify(learningProgress));
     }
-  }, [words, settings, learningProgress, isLoaded]);
+  }, [learningProgress, isLoaded]);
 
   const updateProgress = (newProgress) => {
     setLearningProgress(prev => ({ ...prev, ...newProgress }));
@@ -144,10 +154,11 @@ const App = () => {
         </nav>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
+      <main className="flex-1 flex flex-col items-center justify-start pt-4 sm:pt-6 pb-8 px-4">
         ${view === 'LEARN' && html`<${FlashCardContainer} 
           words=${words} 
           settings=${settings} 
+          onUpdateSettings=${setSettings}
           progress=${learningProgress}
           onUpdateProgress=${updateProgress}
           onToggleMastery=${toggleMastery} 

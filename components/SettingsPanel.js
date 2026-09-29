@@ -67,8 +67,27 @@ const SettingsPanel = ({ settings, onUpdateSettings }) => {
             <input 
               type="range" min="0.5" max="2" step="0.1" 
               value=${settings.speechRate || 1.0} 
+              onInput=${e => onUpdateSettings({...settings, speechRate: parseFloat(e.target.value)})}
               onChange=${e => onUpdateSettings({...settings, speechRate: parseFloat(e.target.value)})} 
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+              onTouchStart=${e => {
+                if (!e.touches || !e.touches[0]) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+                const nextRate = Math.round((0.5 + ratio * 1.5) * 10) / 10;
+                if (nextRate !== settings.speechRate) {
+                  onUpdateSettings({...settings, speechRate: nextRate});
+                }
+              }}
+              onTouchMove=${e => {
+                if (!e.touches || !e.touches[0]) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+                const nextRate = Math.round((0.5 + ratio * 1.5) * 10) / 10;
+                if (nextRate !== settings.speechRate) {
+                  onUpdateSettings({...settings, speechRate: nextRate});
+                }
+              }}
+              className="touch-range-slider" 
             />
           </section>
 

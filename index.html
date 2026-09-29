@@ -38,6 +38,58 @@
             75% { transform: translateX(5px); }
         }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+
+        /* 触摸屏优化的滑块样式：保持 8px 视觉轨道，扩大到 32px 纵向触控热区 */
+        .touch-range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 32px;
+            background: transparent;
+            cursor: pointer;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .touch-range-slider:focus {
+            outline: none;
+        }
+        .touch-range-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+        }
+        .touch-range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+            margin-top: -8px;
+            transition: transform 0.1s ease;
+        }
+        .touch-range-slider:active::-webkit-slider-thumb {
+            transform: scale(1.15);
+        }
+        .touch-range-slider::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+        }
+        .touch-range-slider::-moz-range-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+            transition: transform 0.1s ease;
+        }
     </style>
 
     <script type="importmap">
