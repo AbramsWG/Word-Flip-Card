@@ -1,16 +1,15 @@
-export interface Word {
+export interface WordEntry {
   id: string;
   english: string;
   chinese: string;
   mastered: boolean;
-  grade: string;
-  unit: string;
+  grade?: string;
+  unit?: string;
 }
 
-export interface Settings {
+export interface AppSettings {
   speechRate: number;
   voiceURI: string;
-  useEdgeTTS: boolean;
   hideMastered: boolean;
   defaultSide: 'CHINESE' | 'ENGLISH';
   practiceMode: boolean;
@@ -23,9 +22,4 @@ export interface LearningProgress {
   selectedUnits: string[];
 }
 
-export interface VoiceOption {
-  voiceURI: string;
-  name: string;
-  lang: string;
-  isCloud?: boolean;
-}
+export type ViewMode = 'LEARN' | 'INPUT' | 'SETTINGS';

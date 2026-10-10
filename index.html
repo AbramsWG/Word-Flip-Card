@@ -7,89 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="A high-performance English word memorization tool using a 3D flip card interface, local storage persistence, and native text-to-speech integration for a premium learning experience.">
+    <meta property="og:title" content="Smart Vocab Flip">
+    <meta property="og:description" content="A high-performance English word memorization tool using a 3D flip card interface, local storage persistence, and native text-to-speech integration for a premium learning experience.">
     <title>Smart Vocab Flip - 模块化专业版</title>
     <link rel="icon" href="./favicon.png" type="image/png">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f8fafc;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-        }
-        .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
-        .preserve-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
-        .backface-hidden { 
-            backface-visibility: hidden; 
-            -webkit-backface-visibility: hidden;
-            -webkit-transform: translateZ(0); 
-        }
-        .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
-        .card-height { height: 500px; }
-        @media (max-width: 640px) { .card-height { height: 420px; } }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-
-        /* 触摸屏优化的滑块样式：保持 8px 视觉轨道，扩大到 32px 纵向触控热区 */
-        .touch-range-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 32px;
-            background: transparent;
-            cursor: pointer;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        .touch-range-slider:focus {
-            outline: none;
-        }
-        .touch-range-slider::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 9999px;
-        }
-        .touch-range-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
-            background: #4f46e5;
-            border: 3px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
-            margin-top: -8px;
-            transition: transform 0.1s ease;
-        }
-        .touch-range-slider:active::-webkit-slider-thumb {
-            transform: scale(1.15);
-        }
-        .touch-range-slider::-moz-range-track {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 9999px;
-        }
-        .touch-range-slider::-moz-range-thumb {
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
-            background: #4f46e5;
-            border: 3px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
-            transition: transform 0.1s ease;
-        }
-    </style>
 </head>
 <body>
     <div id="root"></div>

@@ -1,35 +1,34 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import * as Lucide from 'lucide-react';
-import { Word, Settings } from '../types';
-import { speak, preloadSpeech, stopSpeech } from '../utils/speech';
+import { BrainCircuit, CheckCircle2, XCircle, Zap, Volume2 } from 'lucide-react';
+import { speak } from '../utils/speech';
+import { WordEntry, AppSettings } from '../types';
 
 interface FlashCardProps {
-  word: Word;
-  settings: Settings;
+  word: WordEntry;
+  settings: AppSettings;
   onToggleMastery: () => void;
 }
 
 const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }) => {
+  // 核心 Bug 修复：如果 word 不存在（在过滤瞬间可能发生），直接返回 null
   if (!word) return null;
 
-  const [isFlipped, setIsFlipped] = useState<boolean>(
-    settings.practiceMode ? false : settings.defaultSide === 'ENGLISH'
-  );
-  const [userInput, setUserInput] = useState<string>('');
+  const [isFlipped, setIsFlipped] = useState(settings.practiceMode ? false : settings.defaultSide === 'ENGLISH');
+  const [userInput, setUserInput] = useState('');
   const [testResult, setTestResult] = useState<'correct' | 'incorrect' | null>(null);
-  const [isTested, setIsTested] = useState<boolean>(false);
-  const [isSwitching, setIsSwitching] = useState<boolean>(false);
-  const [prevWordId, setPrevWordId] = useState<string>(word.id);
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
-  const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false);
-  const spellingSessionRef = useRef<number>(0);
+  const [isTested, setIsTested] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [prevWordId, setPrevWordId] = useState(word.id);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const spellingSessionRef = useRef(0);
 
+  // 核心修复：在渲染期间直接检测 ID 变化
   if (word.id !== prevWordId) {
     setPrevWordId(word.id);
     setIsSwitching(true);
     setHighlightedIndex(-1);
-    setIsAudioLoading(false);
     spellingSessionRef.current++;
+    // 同步重置状态，防止渲染旧状态
     if (settings.practiceMode) {
       setIsFlipped(false);
     } else {
@@ -41,101 +40,69 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
   }
 
   useEffect(() => {
+    // 仅负责在动画结束后关闭“障眼法”
     if (isSwitching) {
       const timer = setTimeout(() => setIsSwitching(false), 700);
       return () => clearTimeout(timer);
     }
   }, [isSwitching]);
 
-  // 当翻转回正面或切换卡片时停止正在进行的拼读
+  // 当翻转或切换时停止拼读
   useEffect(() => {
     if (!isFlipped) {
       setHighlightedIndex(-1);
       spellingSessionRef.current++;
-      stopSpeech();
     }
   }, [isFlipped]);
 
   const handleFlip = useCallback(() => {
     if (settings.practiceMode && !isTested && !isFlipped) {
+      // 在练习模式下，如果还没测试且当前是正面，不允许翻转
       return;
     }
-    setIsFlipped((v) => !v);
+    setIsFlipped(v => !v);
   }, [settings.practiceMode, isTested, isFlipped]);
 
-  const handleSpeak = useCallback(
-    async (text: string) => {
-      setHighlightedIndex(-1);
-      const sessionId = ++spellingSessionRef.current;
-      const useEdge = settings.useEdgeTTS !== false;
+  const handleSpeak = useCallback((text: string) => {
+    setHighlightedIndex(-1);
+    const sessionId = ++spellingSessionRef.current;
 
-      // 若开启了逐字母朗读，在朗读完整单词的同时静默预热所有字母音频
-      if (settings.spellOutLoud && useEdge) {
-        preloadSpeech(text, settings.voiceURI, true, true);
-      }
+    speak(text, settings.voiceURI, settings.speechRate, () => {
+      if (settings.spellOutLoud && sessionId === spellingSessionRef.current) {
+        const letters = text.replace(/[^a-zA-Z]/g, '').split('');
+        let current = 0;
 
-      setIsAudioLoading(true);
-      const loadingTimer = setTimeout(() => setIsAudioLoading(false), 600);
+        const spellNext = () => {
+          if (sessionId !== spellingSessionRef.current) return;
 
-      await speak(
-        text,
-        settings.voiceURI,
-        settings.speechRate,
-        () => {
-          clearTimeout(loadingTimer);
-          setIsAudioLoading(false);
-
-          if (settings.spellOutLoud && sessionId === spellingSessionRef.current) {
-            const letters = text.replace(/[^a-zA-Z]/g, '').split('');
-            let current = 0;
-
-            const spellNext = () => {
-              if (sessionId !== spellingSessionRef.current) return;
-
-              if (current < letters.length) {
-                setHighlightedIndex(current);
-                speak(
-                  letters[current],
-                  settings.voiceURI,
-                  settings.speechRate,
-                  () => {
-                    current++;
-                    setTimeout(spellNext, 100);
-                  },
-                  useEdge
-                );
-              } else {
-                setHighlightedIndex(-1);
-              }
-            };
-
-            setTimeout(spellNext, 350);
+          if (current < letters.length) {
+            setHighlightedIndex(current);
+            speak(letters[current], settings.voiceURI, settings.speechRate, () => {
+              current++;
+              setTimeout(spellNext, 100);
+            });
+          } else {
+            setHighlightedIndex(-1);
           }
-        },
-        useEdge
-      );
+        };
 
-      clearTimeout(loadingTimer);
-      setIsAudioLoading(false);
-    },
-    [settings.voiceURI, settings.speechRate, settings.spellOutLoud, settings.useEdgeTTS]
-  );
+        setTimeout(spellNext, 400);
+      }
+    });
+  }, [settings.voiceURI, settings.speechRate, settings.spellOutLoud]);
 
-  const handleTest = (e: React.SyntheticEvent) => {
+  const handleTest = (e: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const normalize = (str: string) =>
-      str
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+    // 标准化处理：转小写，移除标点符号（保留空格），去除首尾空格
+    const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 
     const isCorrect = normalize(userInput) === normalize(word.english);
     setTestResult(isCorrect ? 'correct' : 'incorrect');
     setIsTested(true);
     if (isCorrect) {
+      // 如果正确，延迟一小会儿自动翻转并朗读
       setTimeout(() => {
         setIsFlipped(true);
         handleSpeak(word.english);
@@ -143,13 +110,13 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
     }
   };
 
-  const handleAction = (e: React.SyntheticEvent, action: () => void) => {
+  const handleAction = (e: React.MouseEvent | React.PointerEvent, action: () => void) => {
     e.preventDefault();
     e.stopPropagation();
     action();
   };
 
-  const stopPropagation = (e: React.SyntheticEvent) => {
+  const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
   };
 
@@ -160,54 +127,43 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
     return 'text-2xl sm:text-3xl';
   };
 
-  const segments = word.english.split(/(\s+)/);
-
   return (
     <div className="perspective-1000 w-full h-[450px] group select-none relative">
-      <div
-        className={`relative w-full h-full transition-transform duration-700 preserve-3d ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
-      >
+      <div className={`relative w-full h-full transition-transform duration-700 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+
         {/* 正面: 中文 */}
         <div
           onClick={handleFlip}
           style={{ zIndex: isFlipped ? 0 : 10 }}
-          className={`absolute inset-0 w-full h-full backface-hidden bg-[#A7F3D0] rounded-[2.5rem] shadow-2xl border border-[#A7F3D0] flex flex-col p-8 sm:p-10 overflow-hidden cursor-pointer transition-all duration-300 ${
-            isFlipped ? 'opacity-0' : 'opacity-100'
-          }`}
+          className={`absolute inset-0 w-full h-full backface-hidden bg-[#A7F3D0] rounded-[2.5rem] shadow-2xl border border-[#A7F3D0] flex flex-col p-8 sm:p-10 overflow-hidden cursor-pointer transition-all duration-300 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
         >
           <div className="absolute top-0 right-0 p-8 text-emerald-900 opacity-5 pointer-events-none">
-            <Lucide.BrainCircuit size={180} />
+            <BrainCircuit size={180} />
           </div>
 
           <div className="flex justify-between items-start relative z-30">
             <div className="bg-emerald-900/10 p-2.5 rounded-xl text-emerald-900">
-              <Lucide.BrainCircuit size={28} />
+              <BrainCircuit size={28} />
             </div>
             <button
               onClick={(e) => handleAction(e, onToggleMastery)}
               onPointerDown={stopPropagation}
-              className={`transition-all transform active:scale-90 p-2 rounded-full ${
-                word.mastered
-                  ? 'text-emerald-700'
-                  : 'text-emerald-900/20 hover:text-emerald-900/40'
-              }`}
+              className={`transition-all transform active:scale-90 p-2 rounded-full ${word.mastered ? 'text-emerald-700' : 'text-emerald-900/20 hover:text-emerald-900/40'}`}
             >
-              <Lucide.CheckCircle2 size={40} />
+              <CheckCircle2 size={40} />
             </button>
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 z-10 pointer-events-none">
-            {isSwitching && settings.defaultSide === 'ENGLISH' ? null : (
+            {(isSwitching && settings.defaultSide === 'ENGLISH') ? null : (
               <div className="flex flex-col items-center gap-4">
                 {word.chinese.split('\n').map((line, i) => (
                   <p
                     key={i}
                     className={
                       i === 0
-                        ? 'text-3xl sm:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight'
-                        : 'text-lg sm:text-2xl font-medium text-slate-700 leading-snug max-w-[90%] opacity-80 border-t border-emerald-900/10 pt-2'
+                        ? "text-3xl sm:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight"
+                        : "text-lg sm:text-2xl font-medium text-slate-700 leading-snug max-w-[90%] opacity-80 border-t border-emerald-900/10 pt-2"
                     }
                   >
                     {line}
@@ -217,10 +173,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
             )}
 
             {settings.practiceMode && (
-              <div
-                className="mt-8 w-full max-w-xs pointer-events-auto flex flex-col items-center"
-                onClick={stopPropagation}
-              >
+              <div className="mt-8 w-full max-w-xs pointer-events-auto flex flex-col items-center" onClick={stopPropagation}>
                 <div className="relative w-full">
                   <input
                     type="text"
@@ -230,27 +183,21 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
                     autoComplete="off"
                     spellCheck={false}
                     enterKeyHint="done"
-                    onChange={(e) => setUserInput(e.target.value)}
+                    onChange={e => setUserInput(e.target.value)}
                     placeholder="输入英文单词..."
                     className={`w-full px-6 py-4 rounded-2xl border-2 outline-none transition-all font-bold text-center text-xl ${
                       testResult === 'correct'
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-emerald-900/10 bg-white/50 focus:border-[#87D2B2] focus:bg-white'
                     }`}
-                    onKeyDown={(e) => e.key === 'Enter' && handleTest(e)}
+                    onKeyDown={e => e.key === 'Enter' && handleTest(e)}
                   />
                   {testResult && (
                     <div className="absolute -right-12 top-1/2 -translate-y-1/2">
                       {testResult === 'correct' ? (
-                        <Lucide.CheckCircle2
-                          className="text-emerald-500 animate-bounce"
-                          size={32}
-                        />
+                        <CheckCircle2 className="text-emerald-500 animate-bounce" size={32} />
                       ) : (
-                        <Lucide.XCircle
-                          className="text-white fill-orange-500 animate-shake"
-                          size={32}
-                        />
+                        <XCircle className="text-white fill-orange-500 animate-shake" size={32} />
                       )}
                     </div>
                   )}
@@ -263,7 +210,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
                       : 'bg-white/40 text-emerald-900/30 border-emerald-900/5 hover:bg-white/60 hover:text-emerald-900/50'
                   }`}
                 >
-                  <Lucide.Zap size={32} />
+                  <Zap size={32} />
                 </button>
               </div>
             )}
@@ -277,67 +224,55 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
         <div
           onClick={handleFlip}
           style={{ zIndex: isFlipped ? 10 : 0 }}
-          className={`absolute inset-0 w-full h-full backface-hidden bg-indigo-600 rounded-[2.5rem] shadow-2xl border-2 border-indigo-500 flex flex-col p-8 sm:p-10 rotate-y-180 text-white cursor-pointer transition-all duration-300 ${
-            isFlipped ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 w-full h-full backface-hidden bg-indigo-600 rounded-[2.5rem] shadow-2xl border-2 border-indigo-500 flex flex-col p-8 sm:p-10 rotate-y-180 text-white cursor-pointer transition-all duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}
         >
           <div className="absolute top-0 right-0 p-8 text-white opacity-10 pointer-events-none">
-            <Lucide.BrainCircuit size={180} />
+            <BrainCircuit size={180} />
           </div>
 
           <div className="flex justify-between items-start relative z-30">
             <div className="bg-white/20 p-2.5 rounded-xl text-white">
-              <Lucide.BrainCircuit size={28} />
+              <BrainCircuit size={28} />
             </div>
             <button
               onClick={(e) => handleAction(e, onToggleMastery)}
               onPointerDown={stopPropagation}
-              className={`transition-all transform active:scale-90 p-2 rounded-full ${
-                word.mastered ? 'text-green-300' : 'text-white/30 hover:text-white/50'
-              }`}
+              className={`transition-all transform active:scale-90 p-2 rounded-full ${word.mastered ? 'text-green-300' : 'text-white/30 hover:text-white/50'}`}
             >
-              <Lucide.CheckCircle2 size={40} />
+              <CheckCircle2 size={40} />
             </button>
           </div>
 
           <div className="flex-1 flex flex-col items-center justify-center text-center px-2 z-10 relative">
-            {isSwitching && settings.defaultSide === 'CHINESE' ? null : (
+            {(isSwitching && settings.defaultSide === 'CHINESE') ? null : (
               <>
                 <h3
                   key="word-eng"
-                  className={`font-extrabold tracking-tight mb-8 leading-tight break-words hyphens-auto flex flex-wrap justify-center items-center ${getFontSizeClass(
-                    word.english
-                  )}`}
+                  className={`font-extrabold tracking-tight mb-8 leading-tight break-words hyphens-auto flex flex-wrap justify-center items-center ${getFontSizeClass(word.english)}`}
                 >
-                  {segments.map((segment, sIndex) => {
+                  {word.english.split(/(\s+)/).map((segment, sIndex) => {
+                    // 如果是空格，直接渲染
                     if (/^\s+$/.test(segment)) {
-                      return (
-                        <span key={`s-${sIndex}`} className="inline-block whitespace-pre">
-                          {'\u00A0'}
-                        </span>
-                      );
+                      return <span key={`s-${sIndex}`} className="inline-block whitespace-pre">{'\u00A0'}</span>;
                     }
 
-                    const prefixLength = segments.slice(0, sIndex).join('').length;
+                    // 如果是单词，包裹在一个 inline-block 容器中防止内部换行
                     return (
                       <span key={`w-${sIndex}`} className="inline-block whitespace-nowrap">
                         {segment.split('').map((char, cIndex) => {
-                          const absoluteIndex = prefixLength + cIndex;
+                          // 计算该字符在原始字符串中的真实索引
+                          const absoluteIndex = word.english.substring(
+                            0,
+                            word.english.indexOf(segment, word.english.split(/(\s+)/).slice(0, sIndex).join('').length) + cIndex
+                          ).length;
                           const isLetter = /[a-zA-Z]/.test(char);
-                          const letterIndex = isLetter
-                            ? word.english
-                                .substring(0, absoluteIndex)
-                                .replace(/[^a-zA-Z]/g, '').length
-                            : -1;
-                          const isHighlighted =
-                            isLetter && highlightedIndex !== -1 && highlightedIndex === letterIndex;
+                          const letterIndex = isLetter ? word.english.substring(0, absoluteIndex).replace(/[^a-zA-Z]/g, '').length : -1;
+                          const isHighlighted = isLetter && highlightedIndex !== -1 && highlightedIndex === letterIndex;
 
                           return (
                             <span
                               key={cIndex}
-                              className={`transition duration-200 ${
-                                isHighlighted ? 'text-yellow-300 scale-125 inline-block' : ''
-                              }`}
+                              className={`transition duration-200 ${isHighlighted ? 'text-yellow-300 scale-125 inline-block' : ''}`}
                             >
                               {char}
                             </span>
@@ -353,24 +288,12 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
                   onPointerDown={stopPropagation}
                   className="p-6 sm:p-8 bg-white/20 hover:bg-white/30 rounded-full transition-all group/speak active:scale-90 shadow-lg relative z-40"
                 >
-                  {isAudioLoading ? (
-                    <Lucide.Loader2
-                      size={40}
-                      className="sm:w-11 sm:h-11 animate-spin text-white/90"
-                    />
-                  ) : (
-                    <Lucide.Volume2
-                      size={40}
-                      className="sm:w-11 sm:h-11 group-hover/speak:scale-110 transition-transform"
-                    />
-                  )}
+                  <Volume2 size={40} className="sm:w-11 sm:h-11 group-hover/speak:scale-110 transition-transform" />
                 </button>
               </>
             )}
           </div>
-          <div className="text-center text-indigo-100 text-sm font-bold z-10 pointer-events-none">
-            返回解释
-          </div>
+          <div className="text-center text-indigo-100 text-sm font-bold z-10 pointer-events-none">返回解释</div>
         </div>
       </div>
     </div>

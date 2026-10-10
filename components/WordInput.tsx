@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import * as Lucide from 'lucide-react';
-import { Word } from '../types';
+import { Trash2 } from 'lucide-react';
+import { WordEntry } from '../types';
 
 interface WordInputProps {
-  initialWords: Word[];
-  onSave: (words: Word[]) => void;
+  initialWords: WordEntry[];
+  onSave: (words: WordEntry[]) => void;
 }
 
 const WordInput: React.FC<WordInputProps> = ({ initialWords, onSave }) => {
+  // 初始化时将 word 对象还原为带 Grade 和 Unit 标记的文本
   const getInitialText = () => {
-    let text = '';
+    let text = "";
     let lastGrade: string | null = null;
     let lastUnit: string | null = null;
-    initialWords.forEach((w) => {
+    initialWords.forEach(w => {
       if (w.grade && w.grade !== lastGrade && w.grade !== '默认年级') {
         text += `***${w.grade}***\n`;
         lastGrade = w.grade;
@@ -24,21 +25,16 @@ const WordInput: React.FC<WordInputProps> = ({ initialWords, onSave }) => {
       }
       text += `${w.english} - ${w.chinese.replace(/\n/g, ' | ')}\n`;
     });
-    return (
-      text ||
-      initialWords
-        .map((w) => `${w.english} - ${w.chinese.replace(/\n/g, ' | ')}`)
-        .join('\n')
-    );
+    return text || initialWords.map(w => `${w.english} - ${w.chinese.replace(/\n/g, ' | ')}`).join('\n');
   };
 
-  const [text, setText] = useState<string>(getInitialText());
+  const [text, setText] = useState(getInitialText());
 
   const handleSave = () => {
-    const lines = text.split('\n').filter((l) => l.trim().length > 0);
-    let currentGrade = '默认年级';
-    let currentUnit = 'General';
-    const newWords: Word[] = [];
+    const lines = text.split('\n').filter(l => l.trim().length > 0);
+    let currentGrade = "默认年级";
+    let currentUnit = "General";
+    const newWords: WordEntry[] = [];
 
     lines.forEach((line, index) => {
       const trimmed = line.trim();
@@ -50,24 +46,23 @@ const WordInput: React.FC<WordInputProps> = ({ initialWords, onSave }) => {
       } else if (unitMatch) {
         currentUnit = `Unit ${unitMatch[1]}`;
       } else if (trimmed.includes('-')) {
-        const parts = trimmed.split('-').map((s) => s.trim());
+        const parts = trimmed.split('-').map(s => s.trim());
         const english = parts[0] || 'Empty';
-        const chinese =
-          parts.slice(1).join('-').replace(/\s*\|\s*/g, '\n') || '无解释';
+        const chinese = parts.slice(1).join('-').replace(/\s*\|\s*/g, '\n') || '无解释';
         newWords.push({
           id: `word-${Date.now()}-${index}`,
           english,
           chinese,
           mastered: false,
           grade: currentGrade,
-          unit: currentUnit,
+          unit: currentUnit
         });
       }
     });
     onSave(newWords);
   };
 
-  const handleClear = (e: React.SyntheticEvent) => {
+  const handleClear = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setText('');
@@ -85,7 +80,7 @@ const WordInput: React.FC<WordInputProps> = ({ initialWords, onSave }) => {
               onClick={handleClear}
               className="px-6 py-3 border border-red-200 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition-colors flex items-center gap-2"
             >
-              <Lucide.Trash2 size={18} />
+              <Trash2 size={18} />
               清空
             </button>
             <button
@@ -104,9 +99,7 @@ const WordInput: React.FC<WordInputProps> = ({ initialWords, onSave }) => {
           className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-100 outline-none resize-none font-mono text-slate-700 transition-all"
         />
         <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-dashed text-xs text-slate-500 leading-relaxed">
-          <p className="font-bold mb-1 uppercase tracking-wider text-slate-400">
-            支持格式：
-          </p>
+          <p className="font-bold mb-1 uppercase tracking-wider text-slate-400">支持格式：</p>
           <code className="block mb-1">***三年级上册***</code>
           <code className="block mb-1">---Unit 1---</code>
           <code className="block">Apple - 苹果 | 沙果</code>

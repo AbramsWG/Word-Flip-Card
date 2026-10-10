@@ -12,12 +12,15 @@
   "dependencies": {
     "react": "19.2.3",
     "lucide-react": "0.460.0",
-    "htm": "3.1.1",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }
