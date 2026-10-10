@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, Globe, ChevronDown, Zap, Layout, Edit3, Type, EyeOff } from 'lucide-react';
-import { getAvailableVoices } from '../utils/speech';
+import { Sliders, Globe, ChevronDown, Zap, Layout, Edit3, Type, EyeOff, Trash2 } from 'lucide-react';
+import { getAvailableVoices, NATURAL_VOICES, clearTTSCache } from '../utils/speech';
 import { AppSettings } from '../types';
 
 interface SettingsPanelProps {
@@ -10,6 +10,13 @@ interface SettingsPanelProps {
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onUpdateSettings }) => {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [cacheCleared, setCacheCleared] = useState(false);
+
+  const handleClearCache = async () => {
+    await clearTTSCache();
+    setCacheCleared(true);
+    setTimeout(() => setCacheCleared(false), 2000);
+  };
 
   useEffect(() => {
     const load = () => {
@@ -35,23 +42,56 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onUpdateSetting
         </h2>
 
         <div className="space-y-10">
+          {/* Edge TTS 自然语音开关 */}
+          <section className="flex justify-between items-center">
+            <div className="space-y-1">
+              <span className="font-bold text-slate-700 flex items-center gap-2">
+                <Globe size={18} /> 自然语音 (Edge TTS)
+              </span>
+              <p className="text-xs text-slate-400">开启后调用微软 Edge TTS 输出自然语音，关闭则使用本地系统语音</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!settings.useEdgeTTS}
+                onChange={e => onUpdateSettings({ ...settings, useEdgeTTS: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </section>
+
           {/* 语音选择 */}
           <section className="space-y-4">
             <label className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Globe size={16} /> 推荐音色 (英文)
             </label>
             <div className="relative">
-              <select
-                value={settings.voiceURI || ''}
-                onChange={e => onUpdateSettings({ ...settings, voiceURI: e.target.value })}
-                className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium"
-              >
-                {voices.map(v => (
-                  <option key={v.voiceURI} value={v.voiceURI}>
-                    {v.name.replace(/Microsoft |Google |Apple /g, '')} ({v.lang})
-                  </option>
-                ))}
-              </select>
+              {settings.useEdgeTTS ? (
+                <select
+                  value={settings.edgeVoice || 'en-GB-SoniaNeural'}
+                  onChange={e => onUpdateSettings({ ...settings, edgeVoice: e.target.value })}
+                  className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium"
+                >
+                  {NATURAL_VOICES.map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <select
+                  value={settings.voiceURI || ''}
+                  onChange={e => onUpdateSettings({ ...settings, voiceURI: e.target.value })}
+                  className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-colors cursor-pointer appearance-none text-slate-700 font-medium"
+                >
+                  {voices.map(v => (
+                    <option key={v.voiceURI} value={v.voiceURI}>
+                      {v.name.replace(/Microsoft |Google |Apple /g, '')} ({v.lang})
+                    </option>
+                  ))}
+                </select>
+              )}
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                 <ChevronDown size={20} />
               </div>
@@ -185,6 +225,28 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onUpdateSetting
               />
               <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
+          </section>
+
+          {/* 清除语音缓存 */}
+          <section className="pt-8 border-t border-slate-100 flex justify-between items-center">
+            <div className="space-y-1">
+              <span className="font-bold text-slate-700 flex items-center gap-2">
+                <Trash2 size={18} /> 单词语音缓存
+              </span>
+              <p className="text-xs text-slate-400">清空本地 IndexedDB 与内存中已缓存的所有单词语音</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearCache}
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors flex items-center gap-2 ${
+                cacheCleared
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
+                  : 'border-red-200 text-red-500 hover:bg-red-50'
+              }`}
+            >
+              <Trash2 size={16} />
+              {cacheCleared ? '已清除' : '清除缓存'}
+            </button>
           </section>
         </div>
       </div>

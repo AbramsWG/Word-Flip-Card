@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BrainCircuit, CheckCircle2, XCircle, Zap, Volume2 } from 'lucide-react';
-import { speak } from '../utils/speech';
+import { speak, stopSpeech } from '../utils/speech';
 import { WordEntry, AppSettings } from '../types';
 
 interface FlashCardProps {
@@ -28,6 +28,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
     setIsSwitching(true);
     setHighlightedIndex(-1);
     spellingSessionRef.current++;
+    stopSpeech();
     // 同步重置状态，防止渲染旧状态
     if (settings.practiceMode) {
       setIsFlipped(false);
@@ -52,6 +53,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
     if (!isFlipped) {
       setHighlightedIndex(-1);
       spellingSessionRef.current++;
+      stopSpeech();
     }
   }, [isFlipped]);
 
@@ -66,6 +68,10 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
   const handleSpeak = useCallback((text: string) => {
     setHighlightedIndex(-1);
     const sessionId = ++spellingSessionRef.current;
+    const speechOptions = {
+      useEdgeTTS: settings.useEdgeTTS,
+      edgeVoice: settings.edgeVoice,
+    };
 
     speak(text, settings.voiceURI, settings.speechRate, () => {
       if (settings.spellOutLoud && sessionId === spellingSessionRef.current) {
@@ -80,7 +86,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
             speak(letters[current], settings.voiceURI, settings.speechRate, () => {
               current++;
               setTimeout(spellNext, 100);
-            });
+            }, speechOptions);
           } else {
             setHighlightedIndex(-1);
           }
@@ -88,8 +94,8 @@ const FlashCard: React.FC<FlashCardProps> = ({ word, settings, onToggleMastery }
 
         setTimeout(spellNext, 400);
       }
-    });
-  }, [settings.voiceURI, settings.speechRate, settings.spellOutLoud]);
+    }, speechOptions);
+  }, [settings.voiceURI, settings.speechRate, settings.spellOutLoud, settings.useEdgeTTS, settings.edgeVoice]);
 
   const handleTest = (e: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
     e.preventDefault();

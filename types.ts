@@ -14,6 +14,8 @@ export interface AppSettings {
   defaultSide: 'CHINESE' | 'ENGLISH';
   practiceMode: boolean;
   spellOutLoud: boolean;
+  useEdgeTTS: boolean;
+  edgeVoice: string;
 }
 
 export interface LearningProgress {

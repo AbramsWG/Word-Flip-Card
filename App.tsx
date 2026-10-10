@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { BrainCircuit } from 'lucide-react';
 import FlashCardContainer from './components/FlashCardContainer';
 import WordInput from './components/WordInput';
 import SettingsPanel from './components/SettingsPanel';
-import { getAvailableVoices } from './utils/speech';
+import { getAvailableVoices, preloadWordsTTS } from './utils/speech';
 import { WordEntry, AppSettings, LearningProgress, ViewMode } from './types';
 
 const App: React.FC = () => {
@@ -15,7 +15,9 @@ const App: React.FC = () => {
     hideMastered: false,
     defaultSide: 'CHINESE', // 'CHINESE' or 'ENGLISH'
     practiceMode: false,
-    spellOutLoud: false
+    spellOutLoud: false,
+    useEdgeTTS: true,
+    edgeVoice: 'en-GB-SoniaNeural',
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -70,6 +72,55 @@ const App: React.FC = () => {
     }
   }, [learningProgress, isLoaded]);
 
+  // 计算当前激活筛选条件下的单词列表，用于顶层静默预加载（即使在设置页切换音色/默认面也立即预热）
+  const activeDisplayWords = useMemo(() => {
+    if (words.length === 0) return [];
+    const allGrades = Array.from(new Set(words.filter(w => w.grade).map(w => w.grade!)));
+    const activeGrade = learningProgress.selectedGrade || allGrades[0] || '';
+
+    const allUnitsInGrade = Array.from(
+      new Set(words.filter(w => w.grade === activeGrade && w.unit).map(w => w.unit!))
+    );
+
+    let filtered = words;
+    if (activeGrade) {
+      filtered = filtered.filter(w => w.grade === activeGrade);
+    }
+    if (
+      learningProgress.selectedUnits.length > 0 &&
+      learningProgress.selectedUnits.length < allUnitsInGrade.length
+    ) {
+      filtered = filtered.filter(
+        w => w.unit && learningProgress.selectedUnits.includes(w.unit)
+      );
+    }
+    if (settings.hideMastered) {
+      filtered = filtered.filter(w => !w.mastered);
+    }
+    return filtered;
+  }, [words, learningProgress.selectedGrade, learningProgress.selectedUnits, settings.hideMastered]);
+
+  // 当开启 Edge TTS 时，按优先级预热当前卡片、前后相邻卡片及当前单元所有单词
+  useEffect(() => {
+    if (!isLoaded || !settings.useEdgeTTS || activeDisplayWords.length === 0) return;
+
+    const cancelPreload = preloadWordsTTS({
+      words: activeDisplayWords,
+      currentIndex: learningProgress.currentIndex,
+      voiceId: settings.edgeVoice || 'en-GB-SoniaNeural',
+      spellOutLoud: settings.spellOutLoud,
+    });
+
+    return cancelPreload;
+  }, [
+    isLoaded,
+    settings.useEdgeTTS,
+    settings.edgeVoice,
+    settings.spellOutLoud,
+    activeDisplayWords,
+    learningProgress.currentIndex,
+  ]);
+
   const updateProgress = (newProgress: Partial<LearningProgress>) => {
     setLearningProgress(prev => ({ ...prev, ...newProgress }));
   };
@@ -80,7 +131,8 @@ const App: React.FC = () => {
       if (voices.length > 0 && !voicesInitialized.current) {
         const isValid = voices.some(v => v.voiceURI === settings.voiceURI);
         if (!settings.voiceURI || !isValid) {
-          setSettings(s => ({ ...s, voiceURI: voices[0].voiceURI }));
+          const soniaVoice = voices.find(v => v.name.toLowerCase().includes('sonia'));
+          setSettings(s => ({ ...s, voiceURI: (soniaVoice || voices[0]).voiceURI }));
           voicesInitialized.current = true;
         }
       }
