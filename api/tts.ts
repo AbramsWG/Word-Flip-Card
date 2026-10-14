@@ -56,8 +56,8 @@ async function synthesizeOnce(
   const muid = crypto.randomBytes(16).toString('hex').toUpperCase();
 
   const wsUrl =
-    `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1` +
-    `?TrustedClientToken=${TRUSTED_CLIENT_TOKEN}` +
+    `wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1` +
+    `?Ocp-Apim-Subscription-Key=${TRUSTED_CLIENT_TOKEN}` +
     `&Sec-MS-GEC=${secMsGec}` +
     `&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}` +
     `&ConnectionId=${connectionId}`;
@@ -228,9 +228,47 @@ async function synthesizeOnce(
   });
 }
 
+const queue: Array<() => void> = [];
+let isProcessingQueue = false;
+
+async function processQueue() {
+  if (isProcessingQueue) return;
+  isProcessingQueue = true;
+  while (queue.length > 0) {
+    const task = queue.shift();
+    if (task) {
+      task();
+      // Enforce a small gap between requests to prevent Microsoft 429 rate limits
+      await new Promise(r => setTimeout(r, 60));
+    }
+  }
+  isProcessingQueue = false;
+}
+
+function enqueueTask<T>(fn: () => Promise<T>, urgent = false): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const task = async () => {
+      try {
+        const res = await fn();
+        resolve(res);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    if (urgent) {
+      // Urgent requests (user clicks/flips) jump straight to the head
+      queue.unshift(task);
+    } else {
+      queue.push(task);
+    }
+    processQueue();
+  });
+}
+
 export async function synthesizeEdgeTTS(
   rawText: string,
-  requestedVoice = 'en-GB-SoniaNeural'
+  requestedVoice = 'en-GB-SoniaNeural',
+  urgent = false
 ): Promise<TTSResponsePayload> {
   const voice = ALLOWED_VOICES[requestedVoice] ? requestedVoice : 'en-GB-SoniaNeural';
   const lang = ALLOWED_VOICES[voice];
@@ -240,12 +278,15 @@ export async function synthesizeEdgeTTS(
     throw new Error('Text is required');
   }
 
-  try {
-    return await synthesizeOnce(text, voice, lang);
-  } catch {
-    // Retry once in case clockSkewSeconds was just calibrated
-    return await synthesizeOnce(text, voice, lang);
-  }
+  return enqueueTask(async () => {
+    try {
+      return await synthesizeOnce(text, voice, lang);
+    } catch {
+      // Retry once with a brief backoff in case clockSkewSeconds was just calibrated
+      await new Promise(r => setTimeout(r, 300));
+      return await synthesizeOnce(text, voice, lang);
+    }
+  });
 }
 
 export default async function handler(req: any, res: any) {
@@ -255,6 +296,7 @@ export default async function handler(req: any, res: any) {
 
   const text = (req.method === 'GET' ? req.query?.text : req.body?.text) as string | undefined;
   const voice = (req.method === 'GET' ? req.query?.voice : req.body?.voice) as string | undefined;
+  const urgent = (req.method === 'GET' ? req.query?.urgent === '1' : req.body?.urgent === true);
 
   if (!text || typeof text !== 'string' || !text.trim()) {
     return res.status(400).json({ error: 'Text parameter is required' });
@@ -265,7 +307,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const result = await synthesizeEdgeTTS(text, voice || 'en-GB-SoniaNeural');
+    const result = await synthesizeEdgeTTS(text, voice || 'en-GB-SoniaNeural', urgent);
     // Enable Vercel Edge CDN caching for 1 year so repeated requests for the same word cost 0 invocations
     res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable');
     return res.status(200).json(result);

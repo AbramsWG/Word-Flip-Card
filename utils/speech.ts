@@ -119,7 +119,11 @@ export async function clearTTSCache(): Promise<void> {
   }
 }
 
-export async function fetchOrGetCachedTTS(rawText: string, voiceId: string): Promise<TTSData> {
+export async function fetchOrGetCachedTTS(
+  rawText: string,
+  voiceId: string,
+  urgent = false
+): Promise<TTSData> {
   const cleanText = rawText.trim();
   const cacheKey = getTTSKey(cleanText, voiceId);
 
@@ -150,6 +154,9 @@ export async function fetchOrGetCachedTTS(rawText: string, voiceId: string): Pro
         voice: voiceId,
         v: '2',
       });
+      if (urgent) {
+        params.append('urgent', '1');
+      }
       const response = await fetch(`/api/tts?${params.toString()}`, {
         method: 'GET',
       });
@@ -230,6 +237,8 @@ export function preloadWordsTTS(options: {
       if (!memoryTTSCache.has(key)) {
         try {
           await fetchOrGetCachedTTS(text, activeVoice);
+          // Small pause between preload requests to prevent server spikes
+          await new Promise(r => setTimeout(r, 200));
         } catch {
           // silent ignore
         }
@@ -259,26 +268,21 @@ export function preloadWordsTTS(options: {
 
     if (remainingTexts.length === 0) return;
 
-    const concurrency = 2;
+    // Concurrency = 1 with a healthy 350ms delay between words to avoid rate limiting
     let queueIndex = 0;
-
-    const worker = async () => {
-      while (!cancelled && queueIndex < remainingTexts.length) {
-        const item = remainingTexts[queueIndex++];
-        if (!item) continue;
-        const key = getTTSKey(item, activeVoice);
-        if (memoryTTSCache.has(key)) continue;
-        try {
-          await fetchOrGetCachedTTS(item, activeVoice);
-        } catch {
-          // silent ignore during background preloading
-        }
+    while (!cancelled && queueIndex < remainingTexts.length) {
+      const item = remainingTexts[queueIndex++];
+      if (!item) continue;
+      const key = getTTSKey(item, activeVoice);
+      if (memoryTTSCache.has(key)) continue;
+      try {
+        await fetchOrGetCachedTTS(item, activeVoice);
+        await new Promise(r => setTimeout(r, 350));
+      } catch {
+        // backoff a bit if rate limited or error
+        await new Promise(r => setTimeout(r, 1000));
       }
-    };
-
-    await Promise.all(
-      Array.from({ length: Math.min(concurrency, remainingTexts.length) }, () => worker())
-    );
+    }
   };
 
   runPreload();
@@ -342,13 +346,16 @@ export const speak = (
 
   if (options?.useEdgeTTS) {
     const audio = getSharedAudio();
-    if (!audio) return;
+    if (!audio) {
+      speakLocal(text, voiceURI, rate, onEnd);
+      return;
+    }
 
     const edgeVoiceId = options.edgeVoice || 'en-GB-SoniaNeural';
 
     (async () => {
       try {
-        const ttsData = await fetchOrGetCachedTTS(text, edgeVoiceId);
+        const ttsData = await fetchOrGetCachedTTS(text, edgeVoiceId, true);
         if (activePlaySessionId !== sessionId) return;
 
         audio.src = `data:audio/mp3;base64,${ttsData.audio}`;
@@ -365,13 +372,18 @@ export const speak = (
         };
 
         audio.onerror = (e) => {
-          console.error('Edge TTS Audio playback error:', e);
+          console.warn('Edge TTS Audio playback error, falling back to local speech:', e);
+          if (activePlaySessionId === sessionId) {
+            speakLocal(text, voiceURI, rate, onEnd);
+          }
         };
 
         await audio.play();
       } catch (err) {
         if (activePlaySessionId !== sessionId) return;
-        console.error('Natural TTS Error:', err);
+        console.warn('Edge TTS fallback to local speech:', err);
+        // Fallback gracefully so audio is never broken
+        speakLocal(text, voiceURI, rate, onEnd);
       }
     })();
   } else {
